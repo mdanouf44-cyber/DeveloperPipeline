@@ -226,7 +226,7 @@ label {
     letter-spacing: 0.5px;
 }
 
-input[type="text"], input[type="password"], input[type="time"] {
+input[type="text"], input[type="password"], input[type="time"], select {
     background-color: rgba(0, 0, 0, 0.2);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
@@ -237,7 +237,12 @@ input[type="text"], input[type="password"], input[type="time"] {
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-input:focus {
+select option {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
+
+input:focus, select:focus {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(94, 106, 210, 0.15);

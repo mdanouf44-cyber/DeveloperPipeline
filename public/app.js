@@ -87,6 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Update scheduler inputs only if not actively interacting
+            const selectTz = document.getElementById('select-timezone');
+            if (selectTz && document.activeElement !== selectTz && data.scheduler.timezone) {
+                selectTz.value = data.scheduler.timezone;
+            }
             if (document.activeElement !== tgTime) {
                 tgActive.checked = data.scheduler.telegram.active;
                 tgTime.value = data.scheduler.telegram.time;
@@ -167,11 +171,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save scheduler settings
     async function saveScheduler(type, active, time) {
+        const selectTz = document.getElementById('select-timezone');
+        const tz = selectTz ? selectTz.value : "Asia/Kolkata";
         try {
             const res = await fetch('/api/scheduler', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    timezone: tz,
                     [type]: { active, time }
                 })
             });
@@ -235,6 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
     liActive.addEventListener('change', () => {
         saveScheduler('linkedin', liActive.checked, liTime.value);
     });
+
+    const selectTz = document.getElementById('select-timezone');
+    if (selectTz) {
+        selectTz.addEventListener('change', () => {
+            saveScheduler('telegram', tgActive.checked, tgTime.value);
+        });
+    }
 
     // Log terminal actions
     clearLogsBtn.addEventListener('click', () => {

@@ -31,22 +31,25 @@ let activeJobs = {
 
 // Ensure default scheduler config exists
 function loadSchedulerConfig() {
+    const defaultConfig = {
+        timezone: "Asia/Kolkata",
+        telegram: { active: true, time: "18:00" },
+        linkedin: { active: true, time: "19:30" }
+    };
     if (!fs.existsSync(CONFIG_PATH)) {
-        const defaultConfig = {
-            telegram: { active: true, time: "18:00" },
-            linkedin: { active: true, time: "19:30" }
-        };
         fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultConfig, null, 2));
         return defaultConfig;
     }
     try {
-        return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+        const loaded = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+        if (!loaded.timezone) {
+            loaded.timezone = "Asia/Kolkata";
+            fs.writeFileSync(CONFIG_PATH, JSON.stringify(loaded, null, 2));
+        }
+        return loaded;
     } catch (e) {
         console.error("Error reading scheduler_config.json, returning default", e);
-        return {
-            telegram: { active: true, time: "18:00" },
-            linkedin: { active: true, time: "19:30" }
-        };
+        return defaultConfig;
     }
 }
 
@@ -156,22 +159,26 @@ function runPipeline(type) {
 // Setup or reload the Cron Jobs
 function initScheduler() {
     const config = loadSchedulerConfig();
+    const tz = config.timezone || "Asia/Kolkata";
     
     // Stop existing jobs
     if (activeJobs.telegram) activeJobs.telegram.stop();
     if (activeJobs.linkedin) activeJobs.linkedin.stop();
 
-    logToFile("Initializing scheduler jobs...");
+    logToFile(`Initializing scheduler jobs with timezone: ${tz}...`);
 
     // Setup Telegram Daily Job
     if (config.telegram && config.telegram.active) {
         const [hour, minute] = config.telegram.time.split(':');
         const cronExpr = `${minute} ${hour} * * *`;
-        logToFile(`Scheduled Telegram Pipeline: daily at ${config.telegram.time} (Cron: "${cronExpr}")`);
+        logToFile(`Scheduled Telegram Pipeline: daily at ${config.telegram.time} ${tz} (Cron: "${cronExpr}")`);
         
         activeJobs.telegram = cron.schedule(cronExpr, () => {
             logToFile(`[Scheduler] Triggered scheduled Telegram Pipeline...`);
             runPipeline('telegram');
+        }, {
+            scheduled: true,
+            timezone: tz
         });
     } else {
         logToFile("Telegram Pipeline schedule is disabled.");
@@ -181,11 +188,14 @@ function initScheduler() {
     if (config.linkedin && config.linkedin.active) {
         const [hour, minute] = config.linkedin.time.split(':');
         const cronExpr = `${minute} ${hour} * * *`;
-        logToFile(`Scheduled LinkedIn Posting: daily at ${config.linkedin.time} (Cron: "${cronExpr}")`);
+        logToFile(`Scheduled LinkedIn Posting: daily at ${config.linkedin.time} ${tz} (Cron: "${cronExpr}")`);
         
         activeJobs.linkedin = cron.schedule(cronExpr, () => {
             logToFile(`[Scheduler] Triggered scheduled LinkedIn Posting...`);
             runPipeline('linkedin');
+        }, {
+            scheduled: true,
+            timezone: tz
         });
     } else {
         logToFile("LinkedIn Posting schedule is disabled.");
@@ -302,9 +312,13 @@ app.post('/api/config', (req, res) => {
 });
 
 app.post('/api/scheduler', (req, res) => {
-    const { telegram, linkedin } = req.body;
+    const { telegram, linkedin, timezone } = req.body;
     
     let config = loadSchedulerConfig();
+    
+    if (timezone) {
+        config.timezone = timezone;
+    }
     
     if (telegram) {
         config.telegram.active = telegram.active !== undefined ? telegram.active : config.telegram.active;
