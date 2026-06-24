@@ -11,16 +11,21 @@ ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 
-# Read OpenRouter API key from .env
-openrouter_key = None
-with open("./.env") as f:
-    for line in f:
-        if line.startswith("OPENROUTER_API_KEY="):
-            openrouter_key = line.strip().split("=", 1)[1]
-            break
+# Read OpenRouter API key from environment variables or fallback to .env
+openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+if not openrouter_key:
+    if os.path.exists("./.env"):
+        try:
+            with open("./.env") as f:
+                for line in f:
+                    if line.startswith("OPENROUTER_API_KEY="):
+                        openrouter_key = line.strip().split("=", 1)[1]
+                        break
+        except Exception:
+            pass
 
 if not openrouter_key:
-    print("Error: OPENROUTER_API_KEY not found in .env")
+    print("Error: OPENROUTER_API_KEY not configured in environment or .env file.")
     exit(1)
 
 # API Endpoint URL for OpenRouter

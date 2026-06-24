@@ -5,24 +5,25 @@ import urllib.parse
 import datetime
 import html
 
-# Read token and chat ID from .env
-telegram_token = None
-telegram_chat_id = None
-
-try:
-    with open(".env") as f:
-        for line in f:
-            line = line.strip()
-            if line.startswith("TELEGRAM_BOT_TOKEN="):
-                telegram_token = line.split("=", 1)[1].strip()
-            elif line.startswith("TELEGRAM_CHAT_ID="):
-                telegram_chat_id = line.split("=", 1)[1].strip()
-except Exception as e:
-    print(f"Error reading .env file: {e}")
-    exit(1)
+# Read token and chat ID from environment variables or fallback to .env
+telegram_token = os.environ.get("TELEGRAM_BOT_TOKEN")
+telegram_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 
 if not telegram_token or not telegram_chat_id:
-    print("Error: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not found in .env")
+    if os.path.exists(".env"):
+        try:
+            with open(".env") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("TELEGRAM_BOT_TOKEN="):
+                        telegram_token = line.split("=", 1)[1].strip()
+                    elif line.startswith("TELEGRAM_CHAT_ID="):
+                        telegram_chat_id = line.split("=", 1)[1].strip()
+        except Exception as e:
+            print(f"Warning: Tried reading .env file but got error: {e}")
+
+if not telegram_token or not telegram_chat_id:
+    print("Error: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not configured in environment or .env file.")
     exit(1)
 
 date_str = datetime.date.today().isoformat()

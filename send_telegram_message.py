@@ -9,25 +9,27 @@ if len(sys.argv) < 2:
 
 text = sys.argv[1]
 
-# Read token and chat ID from .env
-telegram_token = None
-telegram_chat_id = None
+# Read token and chat ID from environment variables or fallback to .env
+import os
+telegram_token = os.environ.get("TELEGRAM_BOT_TOKEN")
+telegram_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 env_path = "./.env"
 
-try:
-    with open(env_path) as f:
-        for line in f:
-            line = line.strip()
-            if line.startswith("TELEGRAM_BOT_TOKEN="):
-                telegram_token = line.split("=", 1)[1].strip()
-            elif line.startswith("TELEGRAM_CHAT_ID="):
-                telegram_chat_id = line.split("=", 1)[1].strip()
-except Exception as e:
-    print(f"Error reading .env: {e}")
-    exit(1)
+if not telegram_token or not telegram_chat_id:
+    if os.path.exists(env_path):
+        try:
+            with open(env_path) as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("TELEGRAM_BOT_TOKEN="):
+                        telegram_token = line.split("=", 1)[1].strip()
+                    elif line.startswith("TELEGRAM_CHAT_ID="):
+                        telegram_chat_id = line.split("=", 1)[1].strip()
+        except Exception as e:
+            print(f"Warning: Tried reading .env but got error: {e}")
 
 if not telegram_token or not telegram_chat_id:
-    print("Error: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not configured in .env")
+    print("Error: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not configured in environment or .env file.")
     exit(1)
 
 url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
