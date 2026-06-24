@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline Dashboard — Mohammad Anouf Saani</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand-area">
+                <div class="logo-circle">M</div>
+                <div>
+                    <h1>Developer Pipeline</h1>
+                    <p class="subtitle">Curated by Mohammad Anouf Saani</p>
+                </div>
+            </div>
+            <div class="server-status">
+                <span class="status-indicator live"></span>
+                <span>Server Active</span>
+            </div>
+        </header>
+
+        <!-- Grid Dashboard -->
+        <div class="dashboard-grid">
+            <!-- Pipeline Controls Card -->
+            <div class="card control-card">
+                <h2 class="card-title">🚀 Pipeline Controls</h2>
+                <div class="status-badge-container">
+                    <span class="badge-label">Current State:</span>
+                    <span id="pipeline-state-badge" class="state-badge idle">Idle</span>
+                </div>
+                <div class="action-buttons">
+                    <button id="btn-trigger-telegram" class="btn btn-primary">
+                        <span class="btn-icon">📤</span> Generate & Deliver to Telegram
+                    </button>
+                    <button id="btn-trigger-linkedin" class="btn btn-secondary">
+                        <span class="btn-icon">💼</span> Trigger LinkedIn Scheduling
+                    </button>
+                </div>
+                <div class="last-run-info">
+                    <p>Last Run Time: <span id="lbl-last-run">-</span></p>
+                    <p>Last Run Result: <span id="lbl-last-result">-</span></p>
+                </div>
+            </div>
+
+            <!-- Scheduler Timing Card -->
+            <div class="card scheduler-card">
+                <h2 class="card-title">⏰ Daily Scheduler Settings</h2>
+                <p class="card-desc">Configure the daily automated run timings according to your convenience.</p>
+                
+                <!-- Telegram Scheduler Form -->
+                <div class="scheduler-group">
+                    <div class="scheduler-header">
+                        <h3>1. Telegram Daily Pipeline</h3>
+                        <label class="switch">
+                            <input type="checkbox" id="chk-tg-active">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="scheduler-inputs">
+                        <div class="input-field">
+                            <label for="time-tg">Trigger Time (24h format):</label>
+                            <input type="time" id="time-tg" value="18:00">
+                        </div>
+                        <button id="btn-save-tg" class="btn btn-sm btn-outline">Update Telegram Schedule</button>
+                    </div>
+                </div>
+
+                <!-- LinkedIn Scheduler Form -->
+                <div class="scheduler-group">
+                    <div class="scheduler-header">
+                        <h3>2. LinkedIn Auto-Poster</h3>
+                        <label class="switch">
+                            <input type="checkbox" id="chk-li-active">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="scheduler-inputs">
+                        <div class="input-field">
+                            <label for="time-li">Trigger Time (24h format):</label>
+                            <input type="time" id="time-li" value="19:30">
+                        </div>
+                        <button id="btn-save-li" class="btn btn-sm btn-outline">Update LinkedIn Schedule</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration Settings Card -->
+            <div class="card settings-card">
+                <h2 class="card-title">🔧 Credentials & Config</h2>
+                <form id="config-form" class="settings-form">
+                    <div class="input-group">
+                        <label for="cfg-tg-token">Telegram Bot Token</label>
+                        <input type="password" id="cfg-tg-token" placeholder="••••••••••••••••••••" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="cfg-tg-chat-id">Telegram Chat ID</label>
+                        <input type="text" id="cfg-tg-chat-id" placeholder="e.g. -100xxxxxxxx" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="cfg-or-key">OpenRouter API Key</label>
+                        <input type="password" id="cfg-or-key" placeholder="Leave blank to keep existing key">
+                    </div>
+                    <div class="input-group">
+                        <label for="cfg-apify-key">Apify API Key</label>
+                        <input type="password" id="cfg-apify-key" placeholder="Leave blank to keep existing key">
+                    </div>
+                    <button type="submit" class="btn btn-block btn-accent">Save Configurations</button>
+                </form>
+            </div>
+
+            <!-- Console Log Terminal Card -->
+            <div class="card terminal-card">
+                <div class="terminal-header">
+                    <h2 class="card-title">🖥️ Console Logger Output</h2>
+                    <div class="terminal-actions">
+                        <button id="btn-clear-logs" class="btn-icon-only" title="Clear view">🧹</button>
+                        <button id="btn-refresh-logs" class="btn-icon-only" title="Force refresh">🔄</button>
+                        <label class="autoscroll-chk">
+                            <input type="checkbox" id="chk-autoscroll" checked> Auto-scroll
+                        </label>
+                    </div>
+                </div>
+                <div class="terminal-body">
+                    <pre id="terminal-output">Loading log stream...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

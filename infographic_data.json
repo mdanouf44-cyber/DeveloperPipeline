@@ -1,0 +1,32 @@
+{
+  "title_main": "Llama-3-8B VRAM footprint",
+  "title_span": "by Quantization",
+  "subtitle": "Comparing memory requirements for local LLM execution in production.",
+  "badge": "\ud83d\udcbe VRAM FOOTPRINT",
+  "date_label": "June 2026 Report",
+  "takeaway_num": "4.7 GB",
+  "takeaway_text": "is the VRAM required to run Llama-3-8B at Q4_K_M quantization, making local deployment viable on consumer hardware.",
+  "source": "Source: Llama.cpp Benchmarks | Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani)",
+  "bars": [
+    {
+      "label": "FP16 (Unquantized) - 16.0 GB",
+      "value": "100%",
+      "color": "#E63946"
+    },
+    {
+      "label": "Q8_0 (8-bit Quant) - 8.6 GB",
+      "value": "54%",
+      "color": "#5E6AD2"
+    },
+    {
+      "label": "Q4_K_M (4-bit Quant) - 4.7 GB",
+      "value": "29%",
+      "color": "#5A5A5A"
+    },
+    {
+      "label": "Q2_K (2-bit Quant) - 2.8 GB",
+      "value": "17%",
+      "color": "#111111"
+    }
+  ]
+}

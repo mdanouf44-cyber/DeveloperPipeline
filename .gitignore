@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+carousel-routine/node_modules/
+
+# Local configuration and credentials
+.env
+scheduler_config.json
+
+# Logs
+*.log
+pipeline_run.log
+
+# Generated Daily Posts and Compilation Outputs
+linkedin_posts_*.txt
+linkedin_posts_*.html
+linkedin_posts_*.pdf
+linkedin_posts_today.txt
+linkedin-infographic-*.png
+linkedin-infographic.html
+carousel-routine/output/
+carousel-routine/temp/
+slack_downloads/
+error_screenshot.png
+inspect_after_deletion.png
+temp/

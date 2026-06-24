@@ -1,0 +1,488 @@
+import json
+import urllib.request
+import ssl
+import sys
+import os
+import datetime
+import time
+import traceback
+
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
+# Read OpenRouter API key from .env
+openrouter_key = None
+with open("./.env") as f:
+    for line in f:
+        if line.startswith("OPENROUTER_API_KEY="):
+            openrouter_key = line.strip().split("=", 1)[1]
+            break
+
+if not openrouter_key:
+    print("Error: OPENROUTER_API_KEY not found in .env")
+    exit(1)
+
+# API Endpoint URL for OpenRouter
+url = "https://openrouter.ai/api/v1/chat/completions"
+headers = {
+    "Authorization": f"Bearer {openrouter_key}",
+    "Content-Type": "application/json"
+}
+
+def call_gemini(system_prompt, prompt, max_tokens=4000):
+    # Rename to call_gemini to avoid altering downstream calls, but route to OpenRouter
+    payload = {
+        "model": "google/gemma-4-31b-it:free",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": 4000
+    }
+    
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers=headers,
+        method="POST"
+    )
+    
+    # Retry logic for rate limits (429)
+    for attempt in range(5):
+        try:
+            with urllib.request.urlopen(req, context=ctx) as res:
+                resp = json.loads(res.read().decode("utf-8"))
+                if resp and "choices" in resp and len(resp["choices"]) > 0:
+                    text = resp["choices"][0]["message"]["content"]
+                    return text
+                else:
+                    print(f"OpenRouter returned unexpected response format: {resp}")
+        except urllib.error.HTTPError as e:
+            if e.code == 429:
+                print(f"Rate limited (429) on OpenRouter. Retrying in {10 * (attempt + 1)}s...")
+                time.sleep(10 * (attempt + 1))
+            else:
+                print(f"HTTP Error calling OpenRouter: {e.code} - {e.reason}")
+                try:
+                    print("Error body:", e.read().decode("utf-8"))
+                except:
+                    pass
+                break
+        except Exception as e:
+            traceback.print_exc()
+            print(f"Error calling OpenRouter: {e}")
+            break
+        time.sleep(2)
+    return None
+
+# Load context data for references
+reddit_posts = []
+if os.path.exists("./reddit_data.json"):
+    with open("./reddit_data.json") as f:
+        reddit_posts = json.load(f)[:15]
+
+ai_news = []
+if os.path.exists("./ai_news_data.json"):
+    with open("./ai_news_data.json") as f:
+        ai_news = json.load(f)[:12]
+
+# Shared writing instructions based on content-doctrine.md and voice-profile.md
+writing_rules = """
+WRITING RULES:
+1. Third-person observer voice, no "I" or "my" or "we" statements. (Except in CTAs: "follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for daily tech breakdowns", "follow for more").
+2. Blunt, developer-credible tone. Speak like a senior systems engineer or developer advocate. No corporate press-release language.
+3. Technical specificity: Use developer-focused jargon (LLM, SLM, RAG, MCP, API, Docker, vLLM, Ollama, vector databases, etc.) naturally and correctly. Include CLI commands, prompt snippets, or benchmarks where appropriate.
+4. No em-dashes anywhere. Use normal commas, semicolons, or periods instead.
+5. Do NOT include any headline, title, or header for the posts (like 'Headline: ...' or bold title lines). Start the content of the post directly with its first sentence/hook.
+6. Post structure: Hook (1-2 lines) -> Technical bottleneck/pain point -> Actionable solution/code -> Target system state -> Technical engineering question -> CTA.
+7. Banned words (NEVER USE ANY): delve, underscore, vibrant, tapestry, interplay, intricate, garner, pivotal, showcase, foster, align with, landscape, key (as adjective), leverages, encompasses, facilitates, utilized, commenced, subsequent to, prior to, in order to, stands as, serves as, is a testament to, plays a vital role, plays a significant role, plays a crucial role, enduring legacy, lasting impact, indelible mark, it's important to note, it's worth noting, no discussion would be complete without, moreover, furthermore, in addition, setting the stage for, marking a shift, evolving landscape, reflects broader trends, game-changer, supercharge, real results, real strategy, real conversations, disruptive, hustle, grind, crush it, synergy, paradigm shift, thought leader, go viral, revolutionary, groundbreaking, unprecedented, cutting-edge, state-of-the-art, next-generation, empower, unlock, journey, ecosystem, world-class, comprehensive, curated, innovative, transformative, passionate, excited to share.
+8. Banned LinkedIn patterns:
+   - "No X. No Y. Just Z."
+   - "It's not just about X. It's about Y."
+   - "If you're serious about X, [do this]"
+   - "And here's the kicker"
+   - "X changed everything"
+   - "Enter:"
+   - "The best part? [short answer]"
+   - Email sign-off language ("To your success")
+9. Banned contrast constructions:
+   - "This isn't about X, it's about Y"
+   - "Not because of X. But because of Y."
+   - "Rather than X, do Y"
+   - "But rather"
+   - "Not just X, but also Y"
+   - "Not only X, but Y"
+10. Varied sentence lengths. Specific numbers and benchmarks over adjectives. No bullets where flowing prose works better.
+"""
+
+system_prompt_main = f"""You are Prithal Bhardwaj's AI copywriter. Write a single, highly engaging LinkedIn post based on the instructions.
+{writing_rules}
+"""
+
+posts_to_generate = [
+    {
+        "id": "1. COLLABORATIVE ARTICLE",
+        "prompt": f"""Write a COLLABORATIVE ARTICLE post.
+Topic: Memory allocation and overhead when running local LLMs.
+Prose: Write about a developer trying to run Llama 3 8B locally on consumer hardware (e.g. RTX 4060 with 8GB VRAM). They experience Out of Memory (OOM) crashes because they didn't configure context window size or KV cache quantization correctly. Explain that KV cache size grows linearly with context. The solution is to use Llama.cpp with Q4_K_M quantization and offload layers to GPU carefully, or configure Ollama system memory constraints to optimize local VRAM.
+Write exactly 1500 to 2000 characters of flowing prose. Start directly with the hook. No titles.
+"""
+    },
+    {
+        "id": "2. POLL",
+        "prompt": f"""Write a POLL post.
+Topic: CrewAI vs AutoGen for agentic orchestration.
+Setup: Ask developers whether they prefer CrewAI (sequential, role-playing, easy to configure via yaml/python) or AutoGen (event-driven, conversational, highly customizable but harder to debug) when building multi-agent systems for production workflows.
+Question: What is your preferred orchestration framework for building production multi-agent systems?
+Options:
+☐ CrewAI (Role-play/YAML focus)
+☐ AutoGen (Conversational/Custom code)
+☐ LangGraph (State graph/Precise control)
+☐ Vanilla Python (No framework)
+Provide the Setup, the Question, the 4 Options, and an Explanation prompt. Do not include any title.
+"""
+    },
+    {
+        "id": "3. CAROUSEL",
+        "prompt": f"""Write a CAROUSEL post content.
+Topic: Model Context Protocol (MCP) data flow.
+Chosen Hook Style: Bold Claim (6-8 words max, curiosity gap).
+Slide 1 Hook: "MCP is replacing custom API wrappers"
+Slides 2-6: Step-by-step process of how Model Context Protocol (MCP) connects client apps (like Cursor or Claude Desktop) to servers (like filesystem, GitHub API, databases) via standard JSON-RPC. Explain how this eliminates the need to build a custom API wrapper for every tool, standardizing tool calls and context sharing. Maximum 2 sentences per slide.
+Slide 7 CTA: "Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more posts on developer workflows."
+Caption: Slide 1 hook, what the carousel covers, engagement question, CTA to save/repost. Max 4 lines.
+Format clearly labeled with Slide 1, Slide 2, etc. and CAROUSEL CAPTION:
+"""
+    },
+    {
+        "id": "4. INFOGRAPHIC",
+        "prompt": f"""Write an INFOGRAPHIC caption.
+Topic: Local LLM VRAM memory footprint by quantization levels.
+Caption: Hook, insight beyond the chart (Llama 3 8B requires ~16GB VRAM at FP16, but drops to ~5.7GB at Q4_K_M quantization, making it runnable on consumer GPUs. Highlighting how quantization enables local model execution without cloud hosting bills. Compare FP16, Q8, Q4_K_M, and Q3), engagement question, CTA. Do not include titles.
+"""
+    },
+    {
+        "id": "5. POST 1",
+        "prompt": f"""Write POST 1 (Tool Spotlight).
+Tool: Ollama's new tool call support.
+Description: It enables local models like Llama 3 to make structured tool calls natively, allowing developers to build local agentic systems without sending sensitive data to external API providers.
+Archetype: Tool Spotlight | Emotion: WOW.
+Start directly with the hook. No titles.
+"""
+    },
+    {
+        "id": "6. POST 2",
+        "prompt": f"""Write POST 2 (Weekly Roundup).
+Summarize these 4 major technical updates from the past week:
+1. Ollama released native tool call support for local LLMs, enabling offline agent workflows.
+2. vLLM project merged a major PR improving FP8 quantization throughput by 40%.
+3. CrewAI introduced structured output constraints via Pydantic schemas.
+4. Anthropic launched Model Context Protocol (MCP) server directory on GitHub.
+Archetype: Weekly Roundup | Emotion: OHHH.
+Format: Intro hook, numbered list (each item max 2 lines), closing, question. No titles.
+"""
+    },
+    {
+        "id": "7. POST 3",
+        "prompt": f"""Write POST 3 (Plain English Breakdown).
+Topic: Model Context Protocol (MCP).
+Explain MCP: It's an open standard that lets developers build a single server to expose tools and data resources, which any compatible AI client (Cursor, Claude, etc.) can read natively.
+Archetype: Plain English Breakdown | Emotion: OHHH.
+Start directly with the hook. No titles.
+"""
+    },
+    {
+        "id": "8. POST 4",
+        "prompt": f"""Write POST 4 (Unfair Advantage).
+Tool: vLLM local serving engine.
+Description: Use vLLM to host models locally. It uses PagedAttention to prevent VRAM fragmentation, allowing developers to get up to 2x higher throughput than standard Llama.cpp setups.
+MUST naturally mention "FounderWing" in the body text or call to action.
+Archetype: Unfair Advantage | Emotion: WOW.
+Start directly with the hook. No titles.
+"""
+    },
+    {
+        "id": "9. POST 5",
+        "prompt": f"""Write POST 5 (Career/Income).
+Topic: Local LLMs vs cloud API hosting costs.
+Description: Running high-volume production tasks on OpenAI or Anthropic APIs can run up thousands in monthly bills. Engineers who learn to quantize and serve local SLMs (using Ollama or vLLM) on local hardware save their teams massive infrastructure debt.
+Archetype: Career/Income | Emotion: AHA.
+Start directly with the hook. No titles.
+"""
+    },
+    {
+        "id": "10. POST 6",
+        "prompt": f"""Write POST 6 (Hot Take).
+Topic: Monolith vs Microservices for AI agent architecture.
+Hot Take: Building complex multi-agent frameworks is overkill for most pipelines. A simple monolith python script with structured outputs is faster, easier to debug, and cheaper to maintain.
+MUST naturally mention "FounderWing" in the body text.
+Archetype: Hot Take | Emotion: THINK.
+Start directly with the hook. No titles.
+"""
+    },
+    {
+        "id": "11. POST 7",
+        "prompt": f"""Write POST 7 (Steal This).
+Topic: Local LLM benchmarking script.
+Description: Provide a copy-pasteable bash/CLI script to run local model benchmarks via Ollama to measure tokens/sec throughput and memory usage.
+Length: Under 120 words.
+Archetype: Steal This | Emotion: WOW.
+Start directly with the hook. No titles.
+"""
+    }
+]
+
+generated_posts = {}
+all_output_text = ""
+
+print("Generating 11 Main Posts...")
+for item in posts_to_generate:
+    print(f"Generating {item['id']}...")
+    result = call_gemini(system_prompt_main, item["prompt"], max_tokens=4000)
+    if not result:
+        print(f"Error: Failed to generate {item['id']}.")
+        sys.exit(1)
+    
+    generated_posts[item["id"]] = result
+    
+    # Format text block
+    all_output_text += "==================================================\n"
+    all_output_text += f"{item['id']}\n"
+    all_output_text += "==================================================\n"
+    all_output_text += result.strip() + "\n\n"
+    time.sleep(1)
+
+# Write output text files
+date_compact = datetime.date.today().isoformat().replace("-", "")
+with open("linkedin_posts_today.txt", "w") as f:
+    f.write(all_output_text)
+with open(f"linkedin_posts_{date_compact}.txt", "w") as f:
+    f.write(all_output_text)
+print(f"11 Main Posts saved to linkedin_posts_{date_compact}.txt")
+
+
+# Now generate the Carousel JSON
+print("Generating Carousel JSON...")
+carousel_json_prompt = f"""
+You are Prithal Bhardwaj's AI visual content designer.
+Based on the generated Carousel post (Post 3) below, you must generate the structured JSON configuration for the Carousel slides.
+
+Post Content:
+{generated_posts.get("3. CAROUSEL", "")}
+
+Format your output as a single valid JSON object. Do NOT wrap it in any markdown code block, and do NOT include any other text before or after the JSON.
+Your JSON must strictly follow this structure:
+{{
+  "1": {{
+    "HEADER_LABEL": "DEVELOPER WORKFLOW",
+    "HOOK_PART_1": "MCP is replacing",
+    "HOOK_PART_2": "custom API wrappers",
+    "HOOK_EMPHASIS": "API WRAPPERS",
+    "SUBTITLE": "How the Model Context Protocol standardizes tool calls and data sharing between AI clients and local development environments."
+  }},
+  "2": {{
+    "PILL_LABEL": "THE PROBLEM",
+    "EYEBROW": "API HELL",
+    "HEADLINE_PART_1": "Writing custom wrappers for",
+    "HEADLINE_PART_2": "every single tool is",
+    "HEADLINE_EMPHASIS": "INEFFICIENT",
+    "SUBHEAD": "Developers waste hours building bespoke integrations.",
+    "BODY_TEXT": "Connecting Cursor or Claude Desktop to filesystems or databases previously required custom scripting."
+  }},
+  "3": {{
+    "HEADER_LABEL": "THE SHIFT",
+    "HUGE_STAT": "1 Std",
+    "CIRCLE_WORD_1": "JSON",
+    "CIRCLE_WORD_2": "RPC",
+    "HEADLINE_PART_1": "A single protocol to",
+    "HEADLINE_PART_2": "connect clients and",
+    "HEADLINE_EMPHASIS": "SERVERS",
+    "BODY_TEXT": "MCP uses standard JSON-RPC to expose tools, resources, and prompt templates to AI clients natively."
+  }},
+  "4": {{
+    "PILL_LABEL": "INTEGRATION",
+    "EYEBROW": "CLIENT APPS",
+    "HEADLINE_PART_1": "Configure Cursor or Claude",
+    "HEADLINE_PART_2": "to read your local",
+    "HEADLINE_EMPHASIS": "CONTEXT",
+    "SUBHEAD": "Expose files, DBs, and tools to the AI.",
+    "BODY_TEXT": "AI clients read the MCP server configuration file directly, immediately gaining the ability to execute exposed functions."
+  }},
+  "5": {{
+    "HEADER_LABEL": "THE PAYOFF",
+    "HUGE_STAT": "10x",
+    "CIRCLE_WORD_1": "SPEED",
+    "CIRCLE_WORD_2": "GAIN",
+    "HEADLINE_PART_1": "Zero code needed to",
+    "HEADLINE_PART_2": "integrate new data",
+    "HEADLINE_EMPHASIS": "INTEGRATION",
+    "BODY_TEXT": "Once an MCP server is deployed, any compatible client can leverage it instantly without rewrite."
+  }},
+  "6": {{
+    "HEADER_LABEL": "THE LESSON",
+    "HUGE_STAT": "Std",
+    "HEADLINE_PART_1": "Standardization always wins over",
+    "HEADLINE_PART_2": "bespoke custom code",
+    "HEADLINE_EMPHASIS": "STANDARDIZATION",
+    "SUBHEAD": "Build once, run anywhere.",
+    "BODY_TEXT": "Instead of writing API wrappers, build MCP servers to future-proof your developer context pipeline."
+  }},
+  "7": {{
+    "HEADLINE_PART_1": "Standardize your stack",
+    "HEADLINE_PART_2": "and optimize context",
+    "HEADLINE_EMPHASIS": "STANDARDIZE",
+    "SUBHEAD": "Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more breakdowns on developer workflows and systems design."
+  }}
+}}
+Generate slide JSON configs reflecting today's Carousel content. Make sure all values are filled in.
+"""
+
+carousel_json_str = call_gemini("You are a JSON writer. Only output raw JSON.", carousel_json_prompt, max_tokens=4000)
+if carousel_json_str:
+    carousel_json_str = carousel_json_str.strip()
+    if carousel_json_str.startswith("```json"):
+        carousel_json_str = carousel_json_str[7:]
+    elif carousel_json_str.startswith("```"):
+        carousel_json_str = carousel_json_str[3:]
+    if carousel_json_str.endswith("```"):
+        carousel_json_str = carousel_json_str[:-3]
+    carousel_json_str = carousel_json_str.strip()
+    
+    try:
+        carousel_data = json.loads(carousel_json_str)
+        with open("./carousel_data.json", "w") as f:
+            json.dump(carousel_data, f, indent=2)
+        print("Saved carousel_data.json successfully!")
+    except Exception as e:
+        print(f"Error parsing Carousel JSON: {e}")
+        print("Raw text:", carousel_json_str)
+
+# Now generate the Infographic JSON
+print("Generating Infographic JSON...")
+infographic_json_prompt = f"""
+You are Prithal Bhardwaj's AI visual content designer.
+Based on the generated Infographic post (Post 4) below, you must generate the structured JSON configuration for the Infographic.
+
+Post Content:
+{generated_posts.get("4. INFOGRAPHIC", "")}
+
+Format your output as a single valid JSON object. Do NOT wrap it in any markdown code block, and do NOT include any other text before or after the JSON.
+Your JSON must strictly follow this structure:
+{{
+  "title_main": "Local LLM VRAM Memory Footprint",
+  "title_span": "VRAM Benchmarks",
+  "subtitle": "How quantization levels reduce the memory overhead of running an 8B model locally.",
+  "badge": "📊 LOCAL AI INFRA",
+  "date_label": "June 2026 Benchmarks",
+  "takeaway_num": "5.7 GB",
+  "takeaway_text": "is the VRAM required for Llama 3 8B at Q4_K_M quantization, enabling local serving on consumer GPUs.",
+  "source": "Source: Llama.cpp Benchmarks | Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani)",
+  "bars": [
+    {{ "label": "Llama 3 8B (FP16/Unquantized) - 16.0 GB", "value": "100%", "color": "#E63946" }},
+    {{ "label": "Llama 3 8B (Q8 Quantization) - 8.5 GB", "value": "53%", "color": "#D9785B" }},
+    {{ "label": "Llama 3 8B (Q4_K_M Quantization) - 5.7 GB", "value": "36%", "color": "#E8A33D" }},
+    {{ "label": "Llama 3 8B (Q3_K_L Quantization) - 4.8 GB", "value": "30%", "color": "#5E6AD2" }}
+  ]
+}}
+Generate a similar JSON for the infographic based on today's VRAM memory dataset.
+"""
+
+infographic_json_str = call_gemini("You are a JSON writer. Only output raw JSON.", infographic_json_prompt, max_tokens=4000)
+if infographic_json_str:
+    infographic_json_str = infographic_json_str.strip()
+    if infographic_json_str.startswith("```json"):
+        infographic_json_str = infographic_json_str[7:]
+    elif infographic_json_str.startswith("```"):
+        infographic_json_str = infographic_json_str[3:]
+    if infographic_json_str.endswith("```"):
+        infographic_json_str = infographic_json_str[:-3]
+    infographic_json_str = infographic_json_str.strip()
+    
+    try:
+        infographic_data = json.loads(infographic_json_str)
+        with open("./infographic_data.json", "w") as f:
+            json.dump(infographic_data, f, indent=2)
+        print("Saved infographic_data.json successfully!")
+    except Exception as e:
+        print(f"Error parsing Infographic JSON: {e}")
+        print("Raw text:", infographic_json_str)
+
+
+# Now generate the 5 Performance posts
+print("Generating 5 Performance Posts...")
+performance_system_prompt = f"""You are the Mohammad Anouf Saani Performance Engine. Write 5 report-driven posts reverse-engineered from actual analytics.
+{writing_rules}
+"""
+
+perf_posts_list = [
+    {
+        "id": "1. FOUNDER PSYCHOLOGY CONTRARIAN",
+        "prompt": f"""Write the FOUNDER PSYCHOLOGY CONTRARIAN performance post.
+Topic: Cloud API hosting vs Local models. Explain that most engineering teams leak budget by calling cloud APIs for simple classification or extraction tasks, convincing themselves they need Claude 3.5 Sonnet or GPT-4o. Real systems engineers deploy optimized local SLMs (like Llama 3 8B or Phi 3) to run high-volume structured data tasks locally, saving 90%+ in API bills.
+Start directly with the hook. No titles.
+"""
+    },
+    {
+        "id": "2. LOADED POLL",
+        "prompt": f"""Write the LOADED POLL performance post.
+Topic: "What is your primary vector database for RAG pipelines?"
+Question: What is your preferred vector database setup for running production RAG pipelines?
+Options:
+☐ pgvector (PostgreSQL extension)
+☐ Pinecone (Fully managed cloud)
+☐ Qdrant (Rust-based local/cloud)
+☐ Chroma (Fast python prototyping)
+Provide Setup, Question, Options, and Explanation. No titles.
+"""
+    },
+    {
+        "id": "3. AI NEWS + IMPLICATIONS",
+        "prompt": f"""Write the AI NEWS + IMPLICATIONS performance post.
+Topic: pgvector performance scaling benchmarks.
+Implication: Teams are shifting away from standalone vector databases to PostgreSQL extensions. This shows that database sprawl is a liability. Keeping vector search close to relational data reduces latency and synchronization overhead.
+Start directly with the hook. No titles.
+"""
+    },
+    {
+        "id": "4. STORY CAROUSEL",
+        "prompt": f"""Write the STORY CAROUSEL performance post content.
+Topic: Migrating from a heavy agentic framework to simple python scripts.
+Slide 1: "Moving away from heavy agentic frameworks"
+Slides 2-6: Case study of how a developer spent weeks debugging state sync, circular loops, and high latency in CrewAI/LangGraph for a simple document ingestion task, then deleted the framework code and wrote a clean 100-line vanilla Python script using structured outputs (Pydantic), reducing execution latency by 80% and debugging time to zero.
+Slide 7: "Vanilla scripts beat heavy abstractions."
+CAROUSEL CAPTION: [prose caption]
+No titles. Format clearly labeled.
+"""
+    },
+    {
+        "id": "5. DATA VISUAL + HOOK",
+        "prompt": f"""Write the DATA VISUAL + HOOK performance post.
+Topic: Ollama quantization throughput comparison.
+Caption: Explain that teams blame model sizing for latency, but the real culprit is KV cache offloading and VRAM quantization choices. Q4_K_M remains the sweet spot for balancing intelligence and throughput.
+Start directly with the hook. No titles.
+"""
+    }
+]
+
+print("Generating 5 Performance Posts sequentially...")
+performance_posts_text = ""
+for item in perf_posts_list:
+    print(f"Generating {item['id']}...")
+    result = call_gemini(performance_system_prompt, item["prompt"], max_tokens=4000)
+    if not result:
+        print(f"Error: Failed to generate {item['id']}.")
+        sys.exit(1)
+        
+    # Format text block
+    performance_posts_text += "==================================================\n"
+    performance_posts_text += f"{item['id']}\n"
+    performance_posts_text += "==================================================\n"
+    performance_posts_text += result.strip() + "\n\n"
+    time.sleep(1)
+
+with open(f"performance_posts_{date_compact}.txt", "w") as f:
+    f.write(performance_posts_text)
+print(f"5 Performance Posts saved to performance_posts_{date_compact}.txt")
+
+print("\n--- Content Generation Completed Successfully ---")
