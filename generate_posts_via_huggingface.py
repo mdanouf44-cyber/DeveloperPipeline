@@ -11,17 +11,23 @@ ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 
-# Read HF_TOKEN from .env
-hf_token = None
+# Read HF_TOKEN from environment variables or fallback to .env
+hf_token = os.environ.get("HF_TOKEN")
 env_path = "./.env"
-with open(env_path) as f:
-    for line in f:
-        if line.startswith("HF_TOKEN="):
-            hf_token = line.strip().split("=", 1)[1]
-            break
 
 if not hf_token:
-    print("Error: HF_TOKEN not found in .env")
+    if os.path.exists(env_path):
+        try:
+            with open(env_path) as f:
+                for line in f:
+                    if line.startswith("HF_TOKEN="):
+                        hf_token = line.strip().split("=", 1)[1]
+                        break
+        except Exception as e:
+            print(f"Warning: Tried reading .env but got error: {e}")
+
+if not hf_token:
+    print("Error: HF_TOKEN not configured in environment or .env file.")
     exit(1)
 
 # Load Reddit posts data (keep top 15 posts)

@@ -77,7 +77,7 @@ function runPipeline(type) {
     let steps = [];
     if (type === 'telegram') {
         steps = [
-            { cmd: 'python', args: ['write_today_data.py'], desc: 'Generate Mock Post Data' },
+            { cmd: 'python', args: ['run_generation.py'], desc: 'Fetch Feeds & Generate Post Data' },
             { cmd: 'node', args: ['build_carousel_today.cjs'], desc: 'Compile Carousel Slides & PDF', useNodePath: true },
             { cmd: 'python', args: ['generate_infographic_today.py'], desc: 'Generate Infographic HTML' },
             { cmd: 'node', args: ['cap_infographic_today.cjs'], desc: 'Capture Infographic Image', useNodePath: true },
