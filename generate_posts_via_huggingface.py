@@ -315,7 +315,8 @@ Write the 11 posts now. Remember to strictly apply all rules (third-person, no b
 Ensure the Carousel and Infographic captions explicitly output their chosen styles/formats (e.g. Chosen style: [style] and Chosen format: [format]) and make sure they are NOT banned!
 """
 
-system_prompt_json = """
+system_prompt_json = """You are a JSON writer. You MUST ONLY output raw JSON. Never write any introduction, thoughts, planning, reasoning, explanation, or conversational text. Start your response with '{' and end with '}'.
+
 You are Prithal Bhardwaj's AI visual content designer.
 Based on the 11 LinkedIn posts generated for today, you must generate the structured JSON configuration for the Carousel (Post 3) and the Infographic (Post 4).
 
@@ -405,7 +406,7 @@ Your JSON must strictly follow this structure:
 }
 """
 
-url = "https://api-inference.huggingface.co/models/zai-org/GLM-5.2/v1/chat/completions"
+url = "https://router.huggingface.co/v1/chat/completions"
 headers = {
     "Authorization": f"Bearer {hf_token}",
     "Content-Type": "application/json"
@@ -413,7 +414,7 @@ headers = {
 
 def make_call(system_p, user_p, max_t=4000):
     payload = {
-        "model": "zai-org/GLM-5.2",
+        "model": "Qwen/Qwen2.5-72B-Instruct",
         "messages": [
             {
                 "role": "system",
@@ -463,38 +464,40 @@ if not post_text:
 
 # Save posts text
 date_compact = datetime.date.today().isoformat().replace("-", "")
-with open("./linkedin_posts_today.txt", "w") as f:
+with open("./linkedin_posts_today.txt", "w", encoding="utf-8") as f:
     f.write(post_text)
-with open(f"./linkedin_posts_{date_compact}.txt", "w") as f:
+with open(f"./linkedin_posts_{date_compact}.txt", "w", encoding="utf-8") as f:
     f.write(post_text)
 print(f"Text posts saved to linkedin_posts_{date_compact}.txt")
 
 # Step 2: Extract visuals JSON data based on generated text posts
 print("Starting Step 2: Extracting visuals layout JSON...")
-json_prompt = f"Here are the generated LinkedIn posts:\n\n{post_text}\n\nGenerate the Carousel and Infographic JSON now."
+json_prompt = f"""Here are the generated LinkedIn posts:
+
+{post_text}
+
+Generate the Carousel and Infographic JSON now.
+CRITICAL: You MUST ONLY output a single raw JSON object. Do NOT write any introduction, description, preamble, planning, thoughts, or formatting blocks. Do NOT explain your work. Start your response directly with the open brace '{{' and end it with the closing brace '}}'."""
 json_data_str = make_call(system_prompt_json, json_prompt, max_t=2000)
 
 if json_data_str:
     try:
-        # Clean up code blocks markdown if LLM wrapped it
-        json_data_str = json_data_str.strip()
-        if json_data_str.startswith("```json"):
-            json_data_str = json_data_str[7:]
-        elif json_data_str.startswith("```"):
-            json_data_str = json_data_str[3:]
-        if json_data_str.endswith("```"):
-            json_data_str = json_data_str[:-3]
-        json_data_str = json_data_str.strip()
+        # Clean up code blocks markdown if LLM wrapped it, and robustly extract JSON block
+        text_to_parse = json_data_str.strip()
+        first_brace = text_to_parse.find('{')
+        last_brace = text_to_parse.rfind('}')
+        if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+            text_to_parse = text_to_parse[first_brace:last_brace + 1]
         
-        layout_data = json.loads(json_data_str)
+        layout_data = json.loads(text_to_parse)
         
         # Save carousel_data.json
-        with open("./carousel_data.json", "w") as f:
+        with open("./carousel_data.json", "w", encoding="utf-8") as f:
             json.dump(layout_data.get("carousel", {}), f, indent=2)
         print("Saved carousel_data.json")
         
         # Save infographic_data.json
-        with open("./infographic_data.json", "w") as f:
+        with open("./infographic_data.json", "w", encoding="utf-8") as f:
             json.dump(layout_data.get("infographic", {}), f, indent=2)
         print("Saved infographic_data.json")
         

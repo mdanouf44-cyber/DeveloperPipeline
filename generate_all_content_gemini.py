@@ -260,9 +260,9 @@ for item in posts_to_generate:
 
 # Write output text files
 date_compact = datetime.date.today().isoformat().replace("-", "")
-with open("linkedin_posts_today.txt", "w") as f:
+with open("linkedin_posts_today.txt", "w", encoding="utf-8") as f:
     f.write(all_output_text)
-with open(f"linkedin_posts_{date_compact}.txt", "w") as f:
+with open(f"linkedin_posts_{date_compact}.txt", "w", encoding="utf-8") as f:
     f.write(all_output_text)
 print(f"11 Main Posts saved to linkedin_posts_{date_compact}.txt")
 
@@ -345,18 +345,16 @@ Generate slide JSON configs reflecting today's Carousel content. Make sure all v
 
 carousel_json_str = call_gemini("You are a JSON writer. Only output raw JSON.", carousel_json_prompt, max_tokens=4000)
 if carousel_json_str:
-    carousel_json_str = carousel_json_str.strip()
-    if carousel_json_str.startswith("```json"):
-        carousel_json_str = carousel_json_str[7:]
-    elif carousel_json_str.startswith("```"):
-        carousel_json_str = carousel_json_str[3:]
-    if carousel_json_str.endswith("```"):
-        carousel_json_str = carousel_json_str[:-3]
-    carousel_json_str = carousel_json_str.strip()
+    # Clean up code blocks markdown if LLM wrapped it, and robustly extract JSON block
+    text_to_parse = carousel_json_str.strip()
+    first_brace = text_to_parse.find('{')
+    last_brace = text_to_parse.rfind('}')
+    if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+        text_to_parse = text_to_parse[first_brace:last_brace + 1]
     
     try:
-        carousel_data = json.loads(carousel_json_str)
-        with open("./carousel_data.json", "w") as f:
+        carousel_data = json.loads(text_to_parse)
+        with open("./carousel_data.json", "w", encoding="utf-8") as f:
             json.dump(carousel_data, f, indent=2)
         print("Saved carousel_data.json successfully!")
     except Exception as e:
@@ -395,18 +393,16 @@ Generate a similar JSON for the infographic based on today's VRAM memory dataset
 
 infographic_json_str = call_gemini("You are a JSON writer. Only output raw JSON.", infographic_json_prompt, max_tokens=4000)
 if infographic_json_str:
-    infographic_json_str = infographic_json_str.strip()
-    if infographic_json_str.startswith("```json"):
-        infographic_json_str = infographic_json_str[7:]
-    elif infographic_json_str.startswith("```"):
-        infographic_json_str = infographic_json_str[3:]
-    if infographic_json_str.endswith("```"):
-        infographic_json_str = infographic_json_str[:-3]
-    infographic_json_str = infographic_json_str.strip()
+    # Clean up code blocks markdown if LLM wrapped it, and robustly extract JSON block
+    text_to_parse = infographic_json_str.strip()
+    first_brace = text_to_parse.find('{')
+    last_brace = text_to_parse.rfind('}')
+    if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+        text_to_parse = text_to_parse[first_brace:last_brace + 1]
     
     try:
-        infographic_data = json.loads(infographic_json_str)
-        with open("./infographic_data.json", "w") as f:
+        infographic_data = json.loads(text_to_parse)
+        with open("./infographic_data.json", "w", encoding="utf-8") as f:
             json.dump(infographic_data, f, indent=2)
         print("Saved infographic_data.json successfully!")
     except Exception as e:
@@ -486,7 +482,7 @@ for item in perf_posts_list:
     performance_posts_text += result.strip() + "\n\n"
     time.sleep(1)
 
-with open(f"performance_posts_{date_compact}.txt", "w") as f:
+with open(f"performance_posts_{date_compact}.txt", "w", encoding="utf-8") as f:
     f.write(performance_posts_text)
 print(f"5 Performance Posts saved to performance_posts_{date_compact}.txt")
 

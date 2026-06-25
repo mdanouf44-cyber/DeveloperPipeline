@@ -1,62 +1,62 @@
 {
   "1": {
-    "HEADER_LABEL": "INTEGRATIONS",
-    "HOOK_PART_1": "Stop building",
-    "HOOK_PART_2": "custom API",
-    "HOOK_EMPHASIS": "wrappers for LLMs",
-    "SUBTITLE": "Use the Model Context Protocol (MCP) to connect tools to models cleanly."
+    "HEADER_LABEL": "CONVERSION OPTIMIZATION",
+    "HOOK_PART_1": "Increased",
+    "HOOK_PART_2": "50%",
+    "HOOK_EMPHASIS": "conversions",
+    "SUBTITLE": "Learn how a startup achieved this in 30 days through strategic A/B testing and user engagement."
   },
   "2": {
-    "PILL_LABEL": "THE PROBLEM",
-    "EYEBROW": "ENGINEERING TAX",
-    "HEADLINE_PART_1": "Writing custom integration",
-    "HEADLINE_PART_2": "code for every tool and",
-    "HEADLINE_EMPHASIS": "model is a developer tax",
-    "SUBHEAD": "Each API wrapper is another source of maintenance overhead and API drift.",
-    "BODY_TEXT": "Developers spend days gluing together custom API endpoints to get LLMs to talk to databases."
+    "PILL_LABEL": "Landing Pages",
+    "EYEBROW": "Optimization",
+    "HEADLINE_PART_1": "A/B Tested",
+    "HEADLINE_PART_2": "Landing Pages",
+    "HEADLINE_EMPHASIS": "Multiple",
+    "SUBHEAD": "Focused on user engagement and call-to-action optimization.",
+    "BODY_TEXT": "Identified high-performing elements through rigorous testing and analysis."
   },
   "3": {
-    "HEADER_LABEL": "MCP STRUCTURE",
-    "HUGE_STAT": "3",
-    "CIRCLE_WORD_1": "CORE",
-    "CIRCLE_WORD_2": "ROLES",
-    "HEADLINE_PART_1": "MCP defines a three-tier",
-    "HEADLINE_PART_2": "architecture: hosts,",
-    "HEADLINE_EMPHASIS": "clients, and servers",
-    "BODY_TEXT": "Clients connect to servers over standard inputs and outputs using JSON-RPC protocols."
+    "HEADER_LABEL": "SOCIAL PROOF",
+    "HUGE_STAT": "95%",
+    "CIRCLE_WORD_1": "Testimonials",
+    "CIRCLE_WORD_2": "Reviews",
+    "HEADLINE_PART_1": "Integrated",
+    "HEADLINE_PART_2": "Social Proof",
+    "HEADLINE_EMPHASIS": "Customer",
+    "BODY_TEXT": "Built trust and credibility with authentic user testimonials and reviews."
   },
   "4": {
-    "PILL_LABEL": "LOCAL SERVER",
-    "EYEBROW": "POSTGRES MCP",
-    "HEADLINE_PART_1": "Run a local Postgres",
-    "HEADLINE_PART_2": "MCP server in a single",
-    "HEADLINE_EMPHASIS": "CLI command",
-    "SUBHEAD": "Expose database schemas to the LLM securely without custom backend code.",
-    "BODY_TEXT": "Use npx @modelcontextprotocol/server-postgres to query tables instantly."
+    "PILL_LABEL": "Email Campaigns",
+    "EYEBROW": "Re-engagement",
+    "HEADLINE_PART_1": "Launched",
+    "HEADLINE_PART_2": "Targeted Emails",
+    "HEADLINE_EMPHASIS": "Campaign",
+    "SUBHEAD": "Re-engage past customers and prospects.",
+    "BODY_TEXT": "Personalized messages improved open rates and conversions."
   },
   "5": {
-    "HEADER_LABEL": "SECURITY",
-    "HUGE_STAT": "HOST",
-    "CIRCLE_WORD_1": "PROXY",
-    "CIRCLE_WORD_2": "ACCESS",
-    "HEADLINE_PART_1": "The host application acts",
-    "HEADLINE_PART_2": "as a security proxy for",
-    "HEADLINE_EMPHASIS": "your credentials",
-    "BODY_TEXT": "Servers only receive specific instructions, preventing API key exposure to LLM contexts."
+    "HEADER_LABEL": "CHATBOT SUPPORT",
+    "HUGE_STAT": "24/7",
+    "CIRCLE_WORD_1": "Support",
+    "CIRCLE_WORD_2": "Assistance",
+    "HEADLINE_PART_1": "Implemented",
+    "HEADLINE_PART_2": "Chatbots",
+    "HEADLINE_EMPHASIS": "Immediate",
+    "BODY_TEXT": "Provided instant support and answered common questions, enhancing user experience."
   },
   "6": {
-    "HEADER_LABEL": "STANDARDS",
-    "HUGE_STAT": "MCP",
-    "HEADLINE_PART_1": "Build once and connect",
-    "HEADLINE_PART_2": "to any compatible MCP",
-    "HEADLINE_EMPHASIS": "compliant LLM host",
-    "SUBHEAD": "Stop rebuilding the wheel for Claude, Gemini, or local models.",
-    "BODY_TEXT": "Exposing your custom database tools as an MCP server works across all supported platforms."
+    "HEADER_LABEL": "USER BEHAVIOR",
+    "HUGE_STAT": "30%",
+    "HEADLINE_PART_1": "Monitored",
+    "HEADLINE_PART_2": "User Behavior",
+    "HEADLINE_EMPHASIS": "Analytics",
+    "SUBHEAD": "Identified and fixed bottlenecks in the funnel.",
+    "BODY_TEXT": "Used advanced analytics tools to track and optimize user interactions."
   },
   "7": {
-    "HEADLINE_PART_1": "Adopt open integration",
-    "HEADLINE_PART_2": "standards to make your",
-    "HEADLINE_EMPHASIS": "systems LLM-ready",
-    "SUBHEAD": "Build tools that conform to MCP specifications. Accelerate agentic workflows without custom glue."
+    "HEADLINE_PART_1": "Continuous",
+    "HEADLINE_PART_2": "Refinement",
+    "HEADLINE_EMPHASIS": "Data-Driven",
+    "SUBHEAD": "Refined the funnel based on insights and feedback."
   }
 }
