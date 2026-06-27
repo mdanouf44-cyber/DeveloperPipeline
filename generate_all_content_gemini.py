@@ -15,8 +15,10 @@ ctx.verify_mode = ssl.CERT_NONE
 openrouter_key = os.environ.get("OPENROUTER_API_KEY")
 gemini_key = os.environ.get("GEMINI_API_KEY")
 gemini_model = os.environ.get("GEMINI_MODEL", "gemini-1.5-pro")
+nvidia_key = os.environ.get("NVIDIA_API_KEY")
+nvidia_model = os.environ.get("NVIDIA_MODEL", "deepseek-ai/deepseek-v4-pro")
 
-if not openrouter_key or not gemini_key:
+if not openrouter_key or not gemini_key or not nvidia_key:
     if os.path.exists("./.env"):
         try:
             with open("./.env") as f:
@@ -28,11 +30,23 @@ if not openrouter_key or not gemini_key:
                         gemini_key = line.split("=", 1)[1].strip()
                     elif line.startswith("GEMINI_MODEL="):
                         gemini_model = line.split("=", 1)[1].strip()
+                    elif line.startswith("NVIDIA_API_KEY="):
+                        nvidia_key = line.split("=", 1)[1].strip()
+                    elif line.startswith("NVIDIA_MODEL="):
+                        nvidia_model = line.split("=", 1)[1].strip()
         except Exception:
             pass
 
 # Determine endpoint and credentials
-if gemini_key:
+if nvidia_key:
+    print("[LLM Configuration] Using direct NVIDIA NIM API.")
+    url = "https://integrate.api.nvidia.com/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {nvidia_key}",
+        "Content-Type": "application/json"
+    }
+    llm_model = nvidia_model
+elif gemini_key:
     print("[LLM Configuration] Using direct Google Gemini API.")
     url = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
     headers = {
@@ -49,7 +63,7 @@ elif openrouter_key:
     }
     llm_model = "google/gemma-4-31b-it:free"
 else:
-    print("Error: Neither GEMINI_API_KEY nor OPENROUTER_API_KEY configured in environment or .env file.")
+    print("Error: Neither GEMINI_API_KEY, NVIDIA_API_KEY nor OPENROUTER_API_KEY configured in environment or .env file.")
     exit(1)
 
 def call_gemini(system_prompt, prompt, max_tokens=4000):
@@ -76,25 +90,33 @@ def call_gemini(system_prompt, prompt, max_tokens=4000):
                 resp = json.loads(res.read().decode("utf-8"))
                 if resp and "choices" in resp and len(resp["choices"]) > 0:
                     text = resp["choices"][0]["message"]["content"]
+                    # Add post-request delay for Nvidia NIM to avoid hitting RPM rate limits
+                    if nvidia_key:
+                        time.sleep(12)
+                    else:
+                        time.sleep(2)
                     return text
                 else:
-                    print(f"OpenRouter returned unexpected response format: {resp}")
+                    print(f"API returned unexpected response format: {resp}")
         except urllib.error.HTTPError as e:
+            err_body = ""
+            try:
+                err_body = e.read().decode("utf-8")
+            except:
+                pass
             if e.code == 429:
-                print(f"Rate limited (429) on OpenRouter. Retrying in {10 * (attempt + 1)}s...")
-                time.sleep(10 * (attempt + 1))
+                # Use a larger backoff delay for Nvidia NIM rate limits
+                backoff_time = 30 * (attempt + 1) if nvidia_key else 15 * (attempt + 1)
+                print(f"Rate limited (429) on API. Response: {err_body}. Retrying in {backoff_time}s...")
+                time.sleep(backoff_time)
             else:
-                print(f"HTTP Error calling OpenRouter: {e.code} - {e.reason}")
-                try:
-                    print("Error body:", e.read().decode("utf-8"))
-                except:
-                    pass
+                print(f"HTTP Error calling API: {e.code} - {e.reason}. Response: {err_body}")
                 break
         except Exception as e:
             traceback.print_exc()
-            print(f"Error calling OpenRouter: {e}")
+            print(f"Error calling API: {e}")
             break
-        time.sleep(2)
+        time.sleep(5)
     return None
 
 # Load context data for references

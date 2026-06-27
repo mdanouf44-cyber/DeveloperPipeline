@@ -22,9 +22,10 @@ def main():
     # Check if keys are set
     openrouter_key = os.environ.get("OPENROUTER_API_KEY")
     gemini_key = os.environ.get("GEMINI_API_KEY")
+    nvidia_key = os.environ.get("NVIDIA_API_KEY")
     hf_token = os.environ.get("HF_TOKEN")
     
-    if not openrouter_key and not gemini_key and not hf_token:
+    if not openrouter_key and not gemini_key and not nvidia_key and not hf_token:
         # Fallback to check .env file if running locally
         env_path = "./.env"
         if os.path.exists(env_path):
@@ -36,30 +37,39 @@ def main():
                             openrouter_key = line.split("=", 1)[1].strip()
                         elif line.startswith("GEMINI_API_KEY="):
                             gemini_key = line.split("=", 1)[1].strip()
+                        elif line.startswith("NVIDIA_API_KEY="):
+                            nvidia_key = line.split("=", 1)[1].strip()
                         elif line.startswith("HF_TOKEN="):
                             hf_token = line.split("=", 1)[1].strip()
             except Exception:
                 pass
 
     generation_success = False
-    if gemini_key:
+    if nvidia_key:
+        print("\n[Generator] Using NVIDIA NIM API directly for content generation...")
+        try:
+            subprocess.run([sys.executable, "-u", "generate_all_content_gemini.py"], check=True)
+            generation_success = True
+        except Exception as e:
+            print(f"Error during Nvidia generation: {e}")
+    elif gemini_key:
         print("\n[Generator] Using Google Gemini API directly for content generation...")
         try:
-            subprocess.run([sys.executable, "generate_all_content_gemini.py"], check=True)
+            subprocess.run([sys.executable, "-u", "generate_all_content_gemini.py"], check=True)
             generation_success = True
         except Exception as e:
             print(f"Error during direct Gemini generation: {e}")
     elif openrouter_key:
         print("\n[Generator] Using OpenRouter (Gemini) for content generation...")
         try:
-            subprocess.run([sys.executable, "generate_all_content_gemini.py"], check=True)
+            subprocess.run([sys.executable, "-u", "generate_all_content_gemini.py"], check=True)
             generation_success = True
         except Exception as e:
             print(f"Error during OpenRouter generation: {e}")
     elif hf_token:
         print("\n[Generator] Using Hugging Face Serverless API for content generation...")
         try:
-            subprocess.run([sys.executable, "generate_posts_via_huggingface.py"], check=True)
+            subprocess.run([sys.executable, "-u", "generate_posts_via_huggingface.py"], check=True)
             generation_success = True
         except Exception as e:
             print(f"Error during Hugging Face generation: {e}")
