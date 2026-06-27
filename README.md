@@ -2,7 +2,7 @@
 
 > Complete automation system for generating, building, and scheduling LinkedIn content for Mohammad Anouf Saani: 16 posts per day (4 Reddit-based + 7 AI news + 5 report-driven performance posts) with carousel PDFs, infographic PNGs, and Slack delivery.
 
-> **Content positioning — the "Varun Mayya of LinkedIn."** As of 2026-06-14, every stream is governed by [`content-doctrine.md`](content-doctrine.md): we write for ambitious generalists who want to know where AI is going and how to get ahead, framed around AI's impact on work, income, skills, and the future. Technical tutorials, indie-hacker tactics, and tool how-tos are out (they underperform); future-of-work, opportunity, and accessible explainers are in. FounderWing stays the brand. The doctrine overrides older topic guidance in any skill file.
+> **Content positioning — The Technical Builder & Architect.** As of 2026-06-14, every stream is governed by [`content-doctrine.md`](content-doctrine.md): we write for developers, software engineers, systems architects, and technical builders. Focus is on local execution, agentic workflows, OSS tooling, and tech ecosystem trends. Mohammad Anouf Saani is the brand. The doctrine overrides older topic guidance in any skill file.
 
 ---
 
@@ -68,16 +68,16 @@ cd carousel-routine && npm install
 ### 🧠 Skill Instructions (the brain)
 | File | Purpose |
 |------|---------|
-| `content-doctrine.md` | **North star** — the "Varun Mayya of LinkedIn" positioning, broadened audience, topic filter, and DROP/AMPLIFY lists that govern every stream |
+| `content-doctrine.md` | **North star** — the "Technical Builder & Architect" positioning, developer audience, topic filter, and DROP/AMPLIFY lists that govern every stream |
 | `daily-linkedin-posts/SKILL.md` | Master orchestration skill — the full pipeline steps |
 | `commands/linkedin-content.md` | Reddit post writing rules, output format, banned words |
 | `skills/linkedin-ai-news-engine/SKILL.md` | AI news engine — 7 archetype post generation |
 | `skills/linkedin-performance-engine/SKILL.md` | Performance engine — 5 posts modeled on Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani)'s own analytics |
-| `founderswing_linkedin_content_report.md` | Live LinkedIn analytics report — the performance engine reads this each run; drop in an updated report to refresh the winning patterns |
+| `linkedin_content_performance_report.md` | Live LinkedIn analytics report — the performance engine reads this each run; drop in an updated report to refresh the winning patterns |
 | `skills/branded-carousel/SKILL.md` | Carousel design system, slide layouts, brand research |
 | `skills/branded-carousel/FORMATS.md` | 6 carousel format templates (Brand Story, Listicle, etc.) |
 | `skills/illustration-formats/SKILL.md` | 5 infographic formats (Ranked Bars, Donut, Timeline, etc.) |
-| `voice-profile.md` | Prithal's writing voice, tone, banned words |
+| `voice-profile.md` | Mohammad Anouf Saani's writing voice, tone, banned words |
 
 ### 📡 Data Fetching Scripts
 | File | Purpose |
@@ -228,7 +228,7 @@ node schedule_all_posts.cjs
 
 ### ⚠️ Cadence caveat (from the analytics report)
 
-The `founderswing_linkedin_content_report.md` is explicit that the account's current ~25-35 posts/week is **suppressing reach** and recommends **≤7 posts/week**. This pipeline produces 16 posts/day, which runs against that finding. The performance posts were added per an explicit "add on top" decision; the volume-reduction recommendation is intentionally **deferred, not resolved.** Revisit whether to cut overall cadence before scaling output further.
+The `linkedin_content_performance_report.md` is explicit that the account's current ~25-35 posts/week is **suppressing reach** and recommends **≤7 posts/week**. This pipeline produces 16 posts/day, which runs against that finding. The performance posts were added per an explicit "add on top" decision; the volume-reduction recommendation is intentionally **deferred, not resolved.** Revisit whether to cut overall cadence before scaling output further.
 
 ---
 

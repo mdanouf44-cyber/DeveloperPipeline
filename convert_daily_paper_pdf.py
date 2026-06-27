@@ -3,8 +3,8 @@ import base64
 import os
 import re
 
-input_path = '/Users/prithal/.gemini/antigravity/brain/0b5e7dd5-21ed-4683-96b3-da9f768406a7/.system_generated/steps/406/output.txt'
-pdf_path = '/Users/prithal/3d website/linkedin-automation-routine/linkedin_posts_20260608.pdf'
+input_path = os.path.expanduser('~/.gemini/antigravity/brain/0b5e7dd5-21ed-4683-96b3-da9f768406a7/.system_generated/steps/406/output.txt'
+pdf_path = './linkedin_posts_20260608.pdf'
 
 with open(input_path, 'r', encoding='utf-8') as f:
     content = f.read()

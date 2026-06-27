@@ -121,7 +121,7 @@ WRITING RULES:
 10. Varied sentence lengths. Specific numbers and benchmarks over adjectives. No bullets where flowing prose works better.
 """
 
-system_prompt_main = f"""You are Prithal Bhardwaj's AI copywriter. Write a single, highly engaging LinkedIn post based on the instructions.
+system_prompt_main = f"""You are Mohammad Anouf Saani's AI copywriter. Write a single, highly engaging LinkedIn post based on the instructions.
 {writing_rules}
 """
 
@@ -202,7 +202,6 @@ Start directly with the hook. No titles.
         "prompt": f"""Write POST 4 (Unfair Advantage).
 Tool: vLLM local serving engine.
 Description: Use vLLM to host models locally. It uses PagedAttention to prevent VRAM fragmentation, allowing developers to get up to 2x higher throughput than standard Llama.cpp setups.
-MUST naturally mention "FounderWing" in the body text or call to action.
 Archetype: Unfair Advantage | Emotion: WOW.
 Start directly with the hook. No titles.
 """
@@ -221,7 +220,6 @@ Start directly with the hook. No titles.
         "prompt": f"""Write POST 6 (Hot Take).
 Topic: Monolith vs Microservices for AI agent architecture.
 Hot Take: Building complex multi-agent frameworks is overkill for most pipelines. A simple monolith python script with structured outputs is faster, easier to debug, and cheaper to maintain.
-MUST naturally mention "FounderWing" in the body text.
 Archetype: Hot Take | Emotion: THINK.
 Start directly with the hook. No titles.
 """
@@ -270,7 +268,7 @@ print(f"11 Main Posts saved to linkedin_posts_{date_compact}.txt")
 # Now generate the Carousel JSON
 print("Generating Carousel JSON...")
 carousel_json_prompt = f"""
-You are Prithal Bhardwaj's AI visual content designer.
+You are Mohammad Anouf Saani's AI visual content designer.
 Based on the generated Carousel post (Post 3) below, you must generate the structured JSON configuration for the Carousel slides.
 
 Post Content:
@@ -364,7 +362,7 @@ if carousel_json_str:
 # Now generate the Infographic JSON
 print("Generating Infographic JSON...")
 infographic_json_prompt = f"""
-You are Prithal Bhardwaj's AI visual content designer.
+You are Mohammad Anouf Saani's AI visual content designer.
 Based on the generated Infographic post (Post 4) below, you must generate the structured JSON configuration for the Infographic.
 
 Post Content:

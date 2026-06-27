@@ -38,14 +38,24 @@ def main():
             except Exception:
                 pass
 
+    generation_success = False
     if openrouter_key:
         print("\n[Generator] Using OpenRouter (Gemini) for content generation...")
-        subprocess.run([sys.executable, "generate_all_content_gemini.py"], check=True)
+        try:
+            subprocess.run([sys.executable, "generate_all_content_gemini.py"], check=True)
+            generation_success = True
+        except Exception as e:
+            print(f"Error during OpenRouter generation: {e}")
     elif hf_token:
         print("\n[Generator] Using Hugging Face Serverless API (GLM-5.2) for content generation...")
-        subprocess.run([sys.executable, "generate_posts_via_huggingface.py"], check=True)
-    else:
-        print("\n[Warning] No LLM API key found (neither OPENROUTER_API_KEY nor HF_TOKEN configured).")
+        try:
+            subprocess.run([sys.executable, "generate_posts_via_huggingface.py"], check=True)
+            generation_success = True
+        except Exception as e:
+            print(f"Error during Hugging Face generation: {e}")
+
+    if not generation_success:
+        print("\n[Warning] LLM generation failed or was not configured/available.")
         print("Falling back to generating Mock Post Data via write_today_data.py...")
         subprocess.run([sys.executable, "write_today_data.py"], check=True)
 

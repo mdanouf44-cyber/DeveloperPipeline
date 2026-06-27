@@ -58,8 +58,9 @@ const { execSync } = require('child_process');
     });
     console.log(`Generated PDF at ${pdfPath}`);
 
-    // Copy to /Users/prithal/Downloads
-    const downloadsDir = "/Users/prithal/Downloads";
+    // Copy to User Downloads
+    const os = require('os');
+    const downloadsDir = path.join(os.homedir(), 'Downloads');
     fs.mkdirSync(downloadsDir, { recursive: true });
     const destPdf = path.join(downloadsDir, `linkedin-carousel-fable-${d.replace(/-/g, '')}.pdf`);
     fs.copyFileSync(pdfPath, destPdf);

@@ -5,12 +5,12 @@ import html
 import os
 
 files_mapping = {
-    "entrepreneur": "/Users/prithal/.gemini/antigravity/brain/38ead829-acea-4d7d-a827-f9956f33c3e3/.system_generated/steps/648/content.md",
-    "startups": "/Users/prithal/.gemini/antigravity/brain/38ead829-acea-4d7d-a827-f9956f33c3e3/.system_generated/steps/664/content.md",
-    "artificial": "/Users/prithal/.gemini/antigravity/brain/38ead829-acea-4d7d-a827-f9956f33c3e3/.system_generated/steps/666/content.md",
-    "SideProject": "/Users/prithal/.gemini/antigravity/brain/38ead829-acea-4d7d-a827-f9956f33c3e3/.system_generated/steps/668/content.md",
-    "ChatGPT": "/Users/prithal/.gemini/antigravity/brain/38ead829-acea-4d7d-a827-f9956f33c3e3/.system_generated/steps/670/content.md",
-    "passive_income": "/Users/prithal/.gemini/antigravity/brain/38ead829-acea-4d7d-a827-f9956f33c3e3/.system_generated/steps/672/content.md"
+    "entrepreneur": os.path.expanduser("~/.gemini/antigravity/brain/38ead829-acea-4d7d-a827-f9956f33c3e3/.system_generated/steps/648/content.md",
+    "startups": os.path.expanduser("~/.gemini/antigravity/brain/38ead829-acea-4d7d-a827-f9956f33c3e3/.system_generated/steps/664/content.md",
+    "artificial": os.path.expanduser("~/.gemini/antigravity/brain/38ead829-acea-4d7d-a827-f9956f33c3e3/.system_generated/steps/666/content.md",
+    "SideProject": os.path.expanduser("~/.gemini/antigravity/brain/38ead829-acea-4d7d-a827-f9956f33c3e3/.system_generated/steps/668/content.md",
+    "ChatGPT": os.path.expanduser("~/.gemini/antigravity/brain/38ead829-acea-4d7d-a827-f9956f33c3e3/.system_generated/steps/670/content.md",
+    "passive_income": os.path.expanduser("~/.gemini/antigravity/brain/38ead829-acea-4d7d-a827-f9956f33c3e3/.system_generated/steps/672/content.md"
 }
 
 all_posts = []

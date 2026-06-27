@@ -99,7 +99,7 @@ Will safety-centric positioning survive public market scrutiny? Or will the dema
     await new Promise(r => setTimeout(r, 2000));
 
     console.log("Taking screenshot before clicking Schedule...");
-    await page.screenshot({ path: '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/pre_save_anthropic.png' });
+    await page.screenshot({ path: './slack_downloads/pre_save_anthropic.png' });
 
     console.log("Clicking 'Schedule' button with native click...");
     const clicked = await clickNativelyShadow(page, (root) => {
@@ -116,7 +116,7 @@ Will safety-centric positioning survive public market scrutiny? Or will the dema
     await new Promise(r => setTimeout(r, 6000));
 
     console.log("Taking screenshot after Schedule click...");
-    await page.screenshot({ path: '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/post_save_anthropic.png' });
+    await page.screenshot({ path: './slack_downloads/post_save_anthropic.png' });
     
     process.exit(0);
   } catch (err) {

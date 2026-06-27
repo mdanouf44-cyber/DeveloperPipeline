@@ -3,10 +3,10 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const TEMP_DIR = '/Users/prithal/Documents/carousel-routine/temp/carousel-branded';
+const TEMP_DIR = './carousel-routine/temp/carousel-branded';
 const DATE_STR = new Date().toISOString().slice(0,10);
 const DATE = DATE_STR.replace(/-/g,'');
-const OUTPUT_DIR = `/Users/prithal/Documents/carousel-routine/output/${DATE_STR}/carousel-branded`;
+const OUTPUT_DIR = `./carousel-routine/output/${DATE_STR}/carousel-branded`;
 
 (async () => {
   const browser = await puppeteer.launch({

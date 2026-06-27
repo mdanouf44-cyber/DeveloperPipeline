@@ -119,7 +119,7 @@ async function fillTimeComboboxShadow(page, selector, value) {
 }
 
 (async () => {
-  const caption = fs.readFileSync('/Users/prithal/3d website/linkedin-automation-routine/post4_caption.txt', 'utf8').trim();
+  const caption = fs.readFileSync('./post4_caption.txt', 'utf8').trim();
   const date = '06/11/2026';
   const time = '6:15 AM';
   const pollQuestion = 'Which approach is more effective for early-stage companies?';
@@ -129,7 +129,7 @@ async function fillTimeComboboxShadow(page, selector, value) {
     'Hybrid style (milestones)',
     'Flex model (funding)'
   ];
-  const prefix = '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/post_poll';
+  const prefix = './slack_downloads/post_poll';
 
   try {
     console.log("Locating active devtools port...");

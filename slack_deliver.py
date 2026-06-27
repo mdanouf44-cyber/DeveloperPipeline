@@ -143,7 +143,7 @@ What you can do with it. If you are a non-technical founder shipping a small pro
 
 The edge is the price. Same category of result, no subscription, no lock-in to one company.
 
-This is exactly the kind of thing we track at FounderWing, the cheaper tool that quietly does the expensive tool's job.
+This is exactly the kind of thing we track, the cheaper tool that quietly does the expensive tool's job.
 
 Who in your network is overpaying for AI tooling and should see this?
 
@@ -175,7 +175,7 @@ Two things this month proved it. First, the US ordered Anthropic to cut its best
 
 What most people get wrong. They obsess over which model scored highest on a test that has nothing to do with their business. The founder using a good enough model inside a sharp workflow beats the one chasing the leaderboard with no system around it.
 
-Capability is getting commoditized. Access, cost, and the workflow you build around the model are the real moat. That is the whole reason FounderWing exists, to help founders pick the tool that fits instead of the one that trends.
+Capability is getting commoditized. Access, cost, and the workflow you build around the model are the real moat. Build a system that fits instead of chasing the one that trends.
 
 Am I wrong, or has the benchmark race stopped mattering for normal businesses?
 

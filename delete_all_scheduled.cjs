@@ -206,7 +206,7 @@ const os = require('os');
     }
 
     console.log(`\nAll scheduled posts deleted! Total deleted: ${deletedCount}`);
-    await page.screenshot({ path: '/Users/prithal/3d website/linkedin-automation-routine/inspect_after_deletion.png' });
+    await page.screenshot({ path: './inspect_after_deletion.png' });
     process.exit(0);
   } catch (err) {
     console.error("Error during deletion:", err);

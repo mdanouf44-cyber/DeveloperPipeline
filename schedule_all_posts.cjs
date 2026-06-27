@@ -175,7 +175,7 @@ async function fillTimeComboboxShadow(page, selector, value) {
 How do you validate a new product idea before building?
 
 Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more.`,
-      assetPath: '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/linkedin-carousel-2026-06-12.pdf',
+      assetPath: './slack_downloads/linkedin-carousel-2026-06-12.pdf',
       title: 'The validation mistake that kills startups'
     },
     {
@@ -188,7 +188,7 @@ Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more.
 What is the biggest hurdle for new AI firms raising capital at high valuations?
 
 Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more data.`,
-      assetPath: '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/linkedin-infographic.png'
+      assetPath: './slack_downloads/linkedin-infographic.png'
     },
     {
       id: 3,
@@ -288,7 +288,7 @@ Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more 
 
 Most visual tools charge high monthly subscription fees before a startup has any paying users. This burns through early capital.
 
-Startups can use pay-as-you-go distilled models to generate ads. Platforms like FounderWing help connect founders with these cost-effective infrastructure tools.
+Startups can use pay-as-you-go distilled models to generate ads. These tools help founders access cost-effective infrastructure without high subscriptions.
 
 Solo founders can run video ad campaigns, test different messages, and find product market fit without software debt.
 
@@ -324,7 +324,7 @@ Save this post to reference hardware trends.`
 
 Private investors have marked up company valuations for years. When these firms list publicly, the market often corrects these numbers down.
 
-Watch how public markets value AI companies. Platforms like FounderWing track how these listings affect early stage startup valuations and VC funding access.
+Watch how public markets value AI companies. These listings directly affect early stage startup valuations and VC funding access.
 
 More realistic valuations bring stability to the startup market, making it easier for founders to raise rounds based on actual revenue.
 
@@ -356,7 +356,7 @@ Save this prompt to use on your next idea.`
     }
   ];
 
-  const screenshotDir = '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads';
+  const screenshotDir = './slack_downloads';
 
   try {
     console.log("Locating active devtools port dynamically...");
@@ -884,7 +884,7 @@ Save this prompt to use on your next idea.`
         const errPages = await errBrowser.pages();
         const errPage = errPages.find(p => p.url().includes('linkedin.com'));
         if (errPage) {
-          await errPage.screenshot({ path: '/Users/prithal/3d website/linkedin-automation-routine/error_screenshot.png' });
+          await errPage.screenshot({ path: './error_screenshot.png' });
           console.log("Saved error screenshot.");
         }
       }

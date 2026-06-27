@@ -164,7 +164,7 @@ async function clickNativelyShadow(page, finderFn) {
     await new Promise(r => setTimeout(r, 6000));
 
     console.log("Taking screenshot of scheduled posts page...");
-    await page.screenshot({ path: '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/all_scheduled_posts.png' });
+    await page.screenshot({ path: './slack_downloads/all_scheduled_posts.png' });
     console.log("✓ Screenshot saved to all_scheduled_posts.png");
     process.exit(0);
 

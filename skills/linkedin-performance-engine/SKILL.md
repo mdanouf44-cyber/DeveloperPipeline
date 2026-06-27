@@ -26,7 +26,7 @@ The five archetypes, in the report's proven priority order:
 
 ```bash
 cat ./content-doctrine.md
-cat ./founderswing_linkedin_content_report.md
+cat ./linkedin_content_performance_report.md
 ```
 
 **`content-doctrine.md` is the north star** — it sets the lane (Positioning: Technical Builder & Architect) and target audience (developers, software engineers, systems architects, and technical builders). The report is the brain for *craft* — which formats win. Hold both: write the report's winning formats (Contrarian, Poll, News, Carousel, Data Visual) but apply them directly to technical builder topics, developer pain points, and engineering benchmarks. Re-read the report every run. Every post must pass the content-doctrine topic filter (Tech Value, Actionability, Educational Depth, Ecosystem Signal) and honor its DROP list.

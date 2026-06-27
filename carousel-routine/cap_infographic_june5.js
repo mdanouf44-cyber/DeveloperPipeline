@@ -13,7 +13,7 @@ const fs = require('fs');
   
   const server = http.createServer((req, res) => {
     res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
-    res.end(fs.readFileSync('/Users/prithal/3d website/linkedin-automation-routine/linkedin-infographic.html'));
+    res.end(fs.readFileSync('./linkedin-infographic.html'));
   });
   
   await new Promise(r => server.listen(8766, r));
@@ -25,7 +25,7 @@ const fs = require('fs');
   // Additional wait
   await page.evaluate(() => new Promise(r => setTimeout(r, 500)));
   
-  const outputPath = '/Users/prithal/3d website/linkedin-automation-routine/linkedin-infographic-20260605.png';
+  const outputPath = './linkedin-infographic-20260605.png';
   await page.screenshot({ path: outputPath, clip: { x: 0, y: 0, width: 1080, height: 1080 } });
   console.log(`Screenshot saved to ${outputPath}`);
   

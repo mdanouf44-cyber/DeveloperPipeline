@@ -1,5 +1,5 @@
 // Generic 1080x1080 screenshotter. Usage: node cap_html_1080.js <input.html> <output.png>
-const puppeteer = require('/Users/prithal/Downloads/daily-linkedin-posts-pipeline/carousel-routine/node_modules/puppeteer');
+const puppeteer = require('./daily-linkedin-posts-pipeline/carousel-routine/node_modules/puppeteer');
 const path = require('path');
 (async () => {
   const htmlPath = process.argv[2];

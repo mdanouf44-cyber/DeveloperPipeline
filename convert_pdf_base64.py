@@ -3,10 +3,10 @@ import base64
 import os
 import re
 
-input_path = '/Users/prithal/.gemini/antigravity/brain/0b5e7dd5-21ed-4683-96b3-da9f768406a7/.system_generated/steps/362/output.txt'
-out_dir = '/Users/prithal/3d website/linkedin-automation-routine/carousel-routine/output/2026-06-08/carousel-branded'
+input_path = os.path.expanduser('~/.gemini/antigravity/brain/0b5e7dd5-21ed-4683-96b3-da9f768406a7/.system_generated/steps/362/output.txt'
+out_dir = './carousel-routine/output/2026-06-08/carousel-branded'
 pdf_path = os.path.join(out_dir, 'linkedin-carousel-2026-06-08.pdf')
-slack_dir = '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads'
+slack_dir = './slack_downloads'
 slack_pdf_path = os.path.join(slack_dir, 'carousel-20260608.pdf')
 
 os.makedirs(out_dir, exist_ok=True)

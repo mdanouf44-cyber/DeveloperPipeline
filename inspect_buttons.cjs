@@ -55,7 +55,7 @@ const fs = require('fs');
     });
 
     console.log("Filtered buttons in modal:", buttons);
-    fs.writeFileSync('/Users/prithal/3d website/linkedin-automation-routine/modal_buttons.json', JSON.stringify(buttons, null, 2));
+    fs.writeFileSync('./modal_buttons.json', JSON.stringify(buttons, null, 2));
     console.log("Saved to modal_buttons.json");
     process.exit(0);
   } catch (err) {

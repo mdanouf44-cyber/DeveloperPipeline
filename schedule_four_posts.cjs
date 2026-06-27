@@ -184,7 +184,7 @@ How do you balance aggressive growth with long-term stability?
 ♻️ Repost to save a freelancer from the revenue trap.
 
 Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for daily frameworks.`,
-      assetPath: '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/linkedin-carousel-2026-06-11.pdf',
+      assetPath: './slack_downloads/linkedin-carousel-2026-06-11.pdf',
       title: 'Built $1.06M revenue with 17,000 orders'
     },
     {
@@ -209,7 +209,7 @@ Is this level of spending a smart long-term bet, or a bubble about to burst?
 ♻️ Repost to help a founder benchmark their AI costs.
 
 Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more data drops.`,
-      assetPath: '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/linkedin-infographic.png'
+      assetPath: './slack_downloads/linkedin-infographic.png'
     },
     {
       id: 3,
@@ -442,7 +442,7 @@ Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more 
       console.log(`\n==========================================`);
       console.log(`Scheduling Post ${post.id} (${post.type}): Date=${post.date}, Time=${post.time}`);
       console.log(`==========================================`);
-      const prefix = `/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/post_${post.type}`;
+      const prefix = `./slack_downloads/post_${post.type}`;
 
       // ALWAYS navigate/reload to feed home page to guarantee a clean slate and close all modals
       console.log("Navigating to feed home page...");
@@ -952,8 +952,8 @@ Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more 
         const errPages = await errBrowser.pages();
         const errPage = errPages.find(p => p.url().includes('linkedin.com'));
         if (errPage) {
-          await errPage.screenshot({ path: '/Users/prithal/3d website/error_screenshot.png' });
-          console.log("Saved error screenshot to /Users/prithal/3d website/error_screenshot.png");
+          await errPage.screenshot({ path: './error_screenshot.png' });
+          console.log("Saved error screenshot to ./error_screenshot.png");
         }
       }
     } catch (screenErr) {

@@ -15,7 +15,7 @@ Follow every phase in strict order. Do NOT skip phases.
 
 ### 0A: Paths & Constants
 ```
-CAROUSEL_DIR = /Users/prithal/3d website/linkedin-automation-routine/carousel-routine
+CAROUSEL_DIR = ./carousel-routine
 TEMP_DIR     = $CAROUSEL_DIR/temp/carousel-branded
 ASSETS_DIR   = $TEMP_DIR/assets
 DATE         = $(date +%Y-%m-%d)

@@ -46,7 +46,7 @@ const path = require('path');
     await new Promise(r => setTimeout(r, 4000));
     
     console.log("Taking screenshot of detail view...");
-    const screenshotPath = '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/preview_12_15_am.png';
+    const screenshotPath = './slack_downloads/preview_12_15_am.png';
     await page.screenshot({ path: screenshotPath });
     console.log(`Screenshot saved to: ${screenshotPath}`);
 

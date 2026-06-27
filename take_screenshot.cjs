@@ -10,7 +10,7 @@ const puppeteer = require('puppeteer-core');
       process.exit(1);
     }
     await page.bringToFront();
-    await page.screenshot({ path: '/Users/prithal/3d website/linkedin-automation-routine/current_state.png' });
+    await page.screenshot({ path: './current_state.png' });
     console.log("Screenshot saved to current_state.png");
     process.exit(0);
   } catch (err) {

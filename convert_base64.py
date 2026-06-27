@@ -1,9 +1,10 @@
+import os
 import json
 import base64
 import re
 
-input_path = '/Users/prithal/.gemini/antigravity/brain/0b5e7dd5-21ed-4683-96b3-da9f768406a7/.system_generated/steps/331/output.txt'
-output_path = '/Users/prithal/3d website/linkedin-automation-routine/linkedin-infographic-20260608.png'
+input_path = os.path.expanduser('~/.gemini/antigravity/brain/0b5e7dd5-21ed-4683-96b3-da9f768406a7/.system_generated/steps/331/output.txt'
+output_path = './linkedin-infographic-20260608.png'
 
 with open(input_path, 'r', encoding='utf-8') as f:
     content = f.read()

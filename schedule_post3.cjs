@@ -119,10 +119,10 @@ async function fillTimeComboboxShadow(page, selector, value) {
 }
 
 (async () => {
-  const caption = fs.readFileSync('/Users/prithal/3d website/linkedin-automation-routine/post3_caption.txt', 'utf8').trim();
+  const caption = fs.readFileSync('./post3_caption.txt', 'utf8').trim();
   const date = '06/09/2026';
   const time = '8:30 AM';
-  const prefix = '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/post_regular';
+  const prefix = './slack_downloads/post_regular';
 
   try {
     console.log("Connecting to browser...");

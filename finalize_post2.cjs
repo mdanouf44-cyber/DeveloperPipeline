@@ -53,7 +53,7 @@ async function clickNativelyShadow(page, finderFn) {
     await new Promise(r => setTimeout(r, 1000));
     
     // Screenshot before clicking
-    await page.screenshot({ path: '/Users/prithal/3d website/linkedin-automation-routine/pre_click_schedule.png' });
+    await page.screenshot({ path: './pre_click_schedule.png' });
     console.log("Pre-click screenshot saved to pre_click_schedule.png");
 
     console.log("Locating and clicking final 'Schedule' button...");
@@ -66,7 +66,7 @@ async function clickNativelyShadow(page, finderFn) {
     if (clicked) {
       console.log("✓ 'Schedule' button clicked successfully.");
       await new Promise(r => setTimeout(r, 6000)); // wait for submit
-      await page.screenshot({ path: '/Users/prithal/3d website/linkedin-automation-routine/post_click_schedule.png' });
+      await page.screenshot({ path: './post_click_schedule.png' });
       console.log("Post-click screenshot saved to post_click_schedule.png");
       process.exit(0);
     } else {

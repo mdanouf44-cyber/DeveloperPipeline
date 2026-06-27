@@ -6,7 +6,7 @@ const puppeteer = require('puppeteer');
   // Launch context with persistent profile in project directory
   const browser = await puppeteer.launch({
     headless: false,
-    userDataDir: '/Users/prithal/Documents/carousel-routine/.puppeteer_profile',
+    userDataDir: './carousel-routine/.puppeteer_profile',
     defaultViewport: null,
     args: ['--start-maximized'],
     protocolTimeout: 1800000 // 30 minutes
@@ -142,7 +142,7 @@ const puppeteer = require('puppeteer');
   const fileInputSelector = 'input[type="file"]';
   await page.waitForSelector(fileInputSelector, { timeout: 30000 });
   const fileInput = await page.$(fileInputSelector);
-  const filePath = '/Users/prithal/Downloads/website-vs-whatsapp-carousel (1).pdf';
+  const filePath = './website-vs-whatsapp-carousel (1).pdf';
   console.log(`📄 Uploading: ${filePath}`);
   await fileInput.uploadFile(filePath);
 

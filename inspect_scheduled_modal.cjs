@@ -149,7 +149,7 @@ const os = require('os');
 
     // Take screenshot of confirmation dialog
     console.log("Taking screenshot of delete confirmation dialog...");
-    await page.screenshot({ path: '/Users/prithal/3d website/linkedin-automation-routine/inspect_delete_confirm.png' });
+    await page.screenshot({ path: './inspect_delete_confirm.png' });
 
     console.log("Inspecting elements in delete confirmation dialog...");
     const confirmElements = await page.evaluate(() => {

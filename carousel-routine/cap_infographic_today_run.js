@@ -14,7 +14,7 @@ const path = require('path');
   
   const server = http.createServer((req, res) => {
     res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
-    const htmlPath = '/Users/prithal/3d website/linkedin-automation-routine/linkedin-infographic.html';
+    const htmlPath = './linkedin-infographic.html';
     res.end(fs.readFileSync(htmlPath));
   });
   
@@ -25,7 +25,7 @@ const path = require('path');
   await page.evaluate(() => document.fonts.ready);
   
   const d = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const outputPath = `/Users/prithal/3d website/linkedin-automation-routine/linkedin-infographic-${d}.png`;
+  const outputPath = `./linkedin-infographic-${d}.png`;
   await page.screenshot({ path: outputPath, clip: { x:0, y:0, width:1080, height:1080 } });
   console.log(`Screenshot saved to ${outputPath}`);
   

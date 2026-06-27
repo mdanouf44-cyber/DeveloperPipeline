@@ -174,7 +174,7 @@ const path = require('path');
     });
 
     console.log("Saving screenshot of scrolled modal...");
-    await page.screenshot({ path: '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/scheduled_modal_scrolled.png' });
+    await page.screenshot({ path: './slack_downloads/scheduled_modal_scrolled.png' });
 
     // Click 'Show more Scheduled posts' if present
     const clickedShowMore = await page.evaluate(() => {
@@ -206,7 +206,7 @@ const path = require('path');
       console.log("Clicked 'Show more Scheduled posts' button, waiting 3s for loading...");
       await new Promise(r => setTimeout(r, 3000));
       console.log("Saving screenshot after clicking show more...");
-      await page.screenshot({ path: '/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/scheduled_modal_scrolled_more.png' });
+      await page.screenshot({ path: './slack_downloads/scheduled_modal_scrolled_more.png' });
     }
 
     // Now extract scheduled posts details

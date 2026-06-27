@@ -48,7 +48,7 @@ def ensure_valid_images():
 # Verify assets
 ensure_valid_images()
 
-skill_path = "/Users/prithal/.gemini/config/skills/branded-carousel/SKILL.md"
+skill_path = "./skills/branded-carousel/SKILL.md"
 with open(skill_path, "r") as f:
     content = f.read()
 

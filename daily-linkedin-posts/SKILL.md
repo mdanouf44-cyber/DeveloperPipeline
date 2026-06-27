@@ -331,7 +331,7 @@ Run the linkedin-performance-engine skill — the data-driven stream modeled on 
 cat ./skills/linkedin-performance-engine/SKILL.md
 ```
 
-Execute the full skill (Phase 0 through Phase 5). It reads `./founderswing_linkedin_content_report.md` fresh each run, so the winning patterns update automatically whenever the user drops in a newer report. Save the complete output to `./performance_posts_$(date +%Y%m%d).txt`.
+Execute the full skill (Phase 0 through Phase 5). It reads `./linkedin_content_performance_report.md` fresh each run, so the winning patterns update automatically whenever the user drops in a newer report. Save the complete output to `./performance_posts_$(date +%Y%m%d).txt`.
 
 The 5 posts (in the report's proven priority order):
 - PERF 1 — Founder Psychology Contrarian (text) — the report's #1 format, not produced anywhere else in the pipeline

@@ -350,7 +350,7 @@ Will safety-centric positioning survive public market scrutiny? Or will the dema
       await new Promise(r => setTimeout(r, 2500));
 
       // Take a screenshot of the edited post
-      await page.screenshot({ path: `/Users/prithal/3d website/linkedin-automation-routine/slack_downloads/edit_${target.key}_filled.png` });
+      await page.screenshot({ path: `./slack_downloads/edit_${target.key}_filled.png` });
       console.log(`Saved screenshot to edit_${target.key}_filled.png`);
 
       // 8. Click "Schedule" button to save changes (broad tag matching)

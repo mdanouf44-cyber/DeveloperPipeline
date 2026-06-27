@@ -2,8 +2,8 @@ import json
 import base64
 import os
 
-input_path = '/Users/prithal/.gemini/antigravity/brain/0b5e7dd5-21ed-4683-96b3-da9f768406a7/.system_generated/steps/341/output.txt'
-out_dir = '/Users/prithal/3d website/linkedin-automation-routine/carousel-routine/output/2026-06-08/carousel-branded'
+input_path = os.path.expanduser('~/.gemini/antigravity/brain/0b5e7dd5-21ed-4683-96b3-da9f768406a7/.system_generated/steps/341/output.txt'
+out_dir = './carousel-routine/output/2026-06-08/carousel-branded'
 
 os.makedirs(out_dir, exist_ok=True)
 

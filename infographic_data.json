@@ -1,41 +1,31 @@
 {
-  "title_main": "Top Reasons Startups Fail",
-  "title_span": "1 in 4",
-  "subtitle": "Discover the key factors behind startup failures and how to avoid them.",
-  "badge": "\ud83d\udcca Key Data Points",
-  "date_label": "October 2023 Report",
-  "takeaway_num": "25%",
-  "takeaway_text": "1 in 4 startups fail due to lack of market need.",
-  "source": "Source: TechCrunch AI | Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani)",
+  "title_main": "Llama-3-8B VRAM footprint",
+  "title_span": "by Quantization",
+  "subtitle": "Comparing memory requirements for local LLM execution in production.",
+  "badge": "\ud83d\udcbe VRAM FOOTPRINT",
+  "date_label": "June 2026 Report",
+  "takeaway_num": "4.7 GB",
+  "takeaway_text": "is the VRAM required to run Llama-3-8B at Q4_K_M quantization, making local deployment viable on consumer hardware.",
+  "source": "Source: Llama.cpp Benchmarks | Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani)",
   "bars": [
     {
-      "label": "Lack of Market Need",
-      "value": "95%",
+      "label": "FP16 (Unquantized) - 16.0 GB",
+      "value": "100%",
       "color": "#E63946"
     },
     {
-      "label": "Insufficient Funding",
-      "value": "80%",
-      "color": "#D9785B"
-    },
-    {
-      "label": "Team Issues",
-      "value": "75%",
-      "color": "#E8A33D"
-    },
-    {
-      "label": "Product Issues",
-      "value": "64%",
+      "label": "Q8_0 (8-bit Quant) - 8.6 GB",
+      "value": "54%",
       "color": "#5E6AD2"
     },
     {
-      "label": "Competition",
-      "value": "63%",
+      "label": "Q4_K_M (4-bit Quant) - 4.7 GB",
+      "value": "29%",
       "color": "#5A5A5A"
     },
     {
-      "label": "Pricing/Cost Issues",
-      "value": "40%",
+      "label": "Q2_K (2-bit Quant) - 2.8 GB",
+      "value": "17%",
       "color": "#111111"
     }
   ]

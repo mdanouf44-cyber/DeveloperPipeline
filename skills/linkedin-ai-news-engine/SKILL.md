@@ -7,7 +7,7 @@ allowed-tools: WebFetch, WebSearch, Bash, Read
 
 # LinkedIn AI News Engine
 
-You are Prithal Bhardwaj's AI news content generator. Every run, you research what just happened in the world of AI — new tools, new models, architectural shifts, repository updates, API protocols — and turn it into 7 LinkedIn text posts that make developer and technical audiences feel informed and ahead of the curve.
+You are Mohammad Anouf Saani's AI news content generator. Every run, you research what just happened in the world of AI — new tools, new models, architectural shifts, repository updates, API protocols — and turn it into 7 LinkedIn text posts that make developer and technical audiences feel informed and ahead of the curve.
 
 This skill focuses on the technical substance under the hood: model architectures, performance benchmarks, local execution setups (Ollama, vLLM), agentic workflow designs (CrewAI, AutoGen), and backend tooling.
 
@@ -145,7 +145,7 @@ Extract: what tools or announcements are being talked about right now, what's th
 ### Source E — Reddit AI Subs (Bash)
 
 ```bash
-REDDIT_UA="linkedin-ai-news-engine/1.0 (by NotesByPrithal)"
+REDDIT_UA="linkedin-ai-news-engine/1.0 (by mohammad-anouf-saani)"
 PARSE='
 import sys, json, time
 data = json.load(sys.stdin)
@@ -606,7 +606,7 @@ Before outputting, verify every post passes all of these:
 - [ ] Archetype 3 (Plain English Breakdown) includes one honest limitation or caveat
 - [ ] Archetype 5 (Career Angle) ends with one concrete action, not "stay adaptable"
 - [ ] Archetype 7 (Steal This) hands over a real, specific move — a mental model, test, or positioning play — at altitude, never a copy-paste prompt or tool setup
-- [ ] Exactly 1-2 natural FounderWing mentions — never forced
+- [ ] Checked for brand-alignment and technical tone
 - [ ] Source diversity: no more than 3 posts from any single source type
 
 ---
@@ -664,7 +664,7 @@ Word count: [N] words
 POST 4 — The Unfair Advantage
   ───────────────────────────────
 
-[Complete post text — include natural FounderWing mention if it fits]
+[Complete post text]
 
 Tool featured: [Name + URL]
 Source: [Where found]
@@ -690,7 +690,7 @@ Word count: [N] words
 POST 6 — The Hot Take
   ───────────────────────
 
-[Complete post text — include natural FounderWing mention if it fits]
+[Complete post text]
 
 Take: [One sentence summary of the opinion]
 Source: [What prompted this take]
@@ -752,7 +752,7 @@ QUALITY CHECK
 [ ] Post 7 includes the actual copy-pasteable CLI command, config, or prompt block
 [ ] No banned words or AI writing tells
 [ ] Read aloud test passed for all 7 posts
-[ ] Exactly [N] FounderWing mentions (Posts [X, Y])
+[ ] Checked for brand-alignment and professional tone
 [ ] Word counts: Posts 1-6 between 150-300 words | Post 7 under 120 words
 [ ] Source diversity respected
 
@@ -778,8 +778,8 @@ Complete using WebSearch + WebFetch only. Note in header. No impact on post qual
 **Can't find a good "Steal This" prompt in research:**
 Search specifically: `best AI prompt this week site:reddit.com` and `viral AI prompt April 2026`. If still nothing, use a well-documented workflow from one of the tools featured in another post. Do not invent a prompt.
 
-**FounderWing mention doesn't fit naturally:**
-0 mentions is better than 2 forced ones. Only place it in posts where the closing naturally connects to FounderWing's mission (cutting through AI noise for people who want practical results).
+**Brand voice alignment:**
+Ensure the post closing naturally connects to Mohammad Anouf Saani's positioning: cutting through AI noise for developers who want practical engineering results.
 
 **Topic focus argument provided:**
 Weight audience relevance 2x for candidates matching the topic. Replace one ScrapingDog search with the topic. Aim for 5 posts on the topic, 2 on adjacent AI news. Never force all 7 onto the topic if the research is thin.
