@@ -42,12 +42,12 @@ const { execSync } = require('child_process');
     const pdfHtmlPath = `${outDir}/carousel.html`;
     let pdfHtml = `<html><body style="margin:0;padding:0;">`;
     for (let i = 1; i <= 7; i++) {
-        pdfHtml += `<img src="file://${path.resolve(outDir + '/slide-0' + i + '.png')}" style="width:1080px;height:1080px;display:block;page-break-after:always;">`;
+        pdfHtml += `<img src="slide-0${i}.png" style="width:1080px;height:1080px;display:block;page-break-after:always;">`;
     }
     pdfHtml += `</body></html>`;
     fs.writeFileSync(pdfHtmlPath, pdfHtml);
 
-    await page.goto(`file://${path.resolve(pdfHtmlPath)}`, { waitUntil: 'networkidle0' });
+    await page.goto(`file://${path.resolve(pdfHtmlPath)}`, { waitUntil: 'load' });
     const pdfPath = `${outDir}/linkedin-carousel-${d}.pdf`;
     await page.pdf({ 
         path: pdfPath, 
