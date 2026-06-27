@@ -567,7 +567,7 @@ Select the color and use it as `{{BRAND_COLOR}}` in all CSS blocks below.
           <div class="browser-dot dot-green"></div>
         </div>
         <div class="browser-content">
-          <img src="assets/hero-ui.png" onerror="this.src='assets/interface.png'"/>
+          <img src="assets/hero-ui.png" onerror="this.onerror=null; this.src='assets/interface.png';"/>
         </div>
       </div>
       <div class="bottom-text">{{SUBTITLE}}</div>
@@ -653,7 +653,7 @@ Select the color and use it as `{{BRAND_COLOR}}` in all CSS blocks below.
       <div class="browser-dot dot-green"></div>
     </div>
     <div class="browser-content">
-      <img src="assets/interface.png" onerror="this.src='assets/hero-ui.png'"/>
+      <img src="assets/interface.png" onerror="this.onerror=null; this.src='assets/hero-ui.png';"/>
     </div>
   </div>
   <div class="bottom-area">
@@ -827,7 +827,7 @@ Select the color and use it as `{{BRAND_COLOR}}` in all CSS blocks below.
           <div class="browser-dot dot-green"></div>
         </div>
         <div class="browser-content">
-          <img src="assets/hero-ui.png" onerror="this.src='assets/interface.png'"/>
+          <img src="assets/hero-ui.png" onerror="this.onerror=null; this.src='assets/interface.png';"/>
         </div>
       </div>
     </div>
