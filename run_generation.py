@@ -19,11 +19,12 @@ def main():
         print(f"Warning: AI news fetch failed: {e}. Moving on...")
 
     # 2. Generate content
-    # Check if OpenRouter key is set
+    # Check if keys are set
     openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+    gemini_key = os.environ.get("GEMINI_API_KEY")
     hf_token = os.environ.get("HF_TOKEN")
     
-    if not openrouter_key and not hf_token:
+    if not openrouter_key and not gemini_key and not hf_token:
         # Fallback to check .env file if running locally
         env_path = "./.env"
         if os.path.exists(env_path):
@@ -33,13 +34,22 @@ def main():
                         line = line.strip()
                         if line.startswith("OPENROUTER_API_KEY="):
                             openrouter_key = line.split("=", 1)[1].strip()
+                        elif line.startswith("GEMINI_API_KEY="):
+                            gemini_key = line.split("=", 1)[1].strip()
                         elif line.startswith("HF_TOKEN="):
                             hf_token = line.split("=", 1)[1].strip()
             except Exception:
                 pass
 
     generation_success = False
-    if openrouter_key:
+    if gemini_key:
+        print("\n[Generator] Using Google Gemini API directly for content generation...")
+        try:
+            subprocess.run([sys.executable, "generate_all_content_gemini.py"], check=True)
+            generation_success = True
+        except Exception as e:
+            print(f"Error during direct Gemini generation: {e}")
+    elif openrouter_key:
         print("\n[Generator] Using OpenRouter (Gemini) for content generation...")
         try:
             subprocess.run([sys.executable, "generate_all_content_gemini.py"], check=True)
@@ -47,7 +57,7 @@ def main():
         except Exception as e:
             print(f"Error during OpenRouter generation: {e}")
     elif hf_token:
-        print("\n[Generator] Using Hugging Face Serverless API (GLM-5.2) for content generation...")
+        print("\n[Generator] Using Hugging Face Serverless API for content generation...")
         try:
             subprocess.run([sys.executable, "generate_posts_via_huggingface.py"], check=True)
             generation_success = True

@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const cfgTgToken = document.getElementById('cfg-tg-token');
     const cfgTgChatId = document.getElementById('cfg-tg-chat-id');
     const cfgOrKey = document.getElementById('cfg-or-key');
+    const cfgGeminiKey = document.getElementById('cfg-gemini-key');
+    const cfgHfToken = document.getElementById('cfg-hf-token');
     const cfgApifyKey = document.getElementById('cfg-apify-key');
 
     const consoleOutput = document.getElementById('terminal-output');
@@ -139,6 +141,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.OPENROUTER_API_KEY) {
                 cfgOrKey.placeholder = "Key exists. Type here to overwrite.";
             }
+            if (data.GEMINI_API_KEY) {
+                cfgGeminiKey.placeholder = "Key exists. Type here to overwrite.";
+            }
+            if (data.HF_TOKEN) {
+                cfgHfToken.placeholder = "Key exists. Type here to overwrite.";
+            }
             if (data.APIFY_API_KEY) {
                 cfgApifyKey.placeholder = "Key exists. Type here to overwrite.";
             }
@@ -202,6 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
             TELEGRAM_BOT_TOKEN: cfgTgToken.value === "EXISTS" ? "EXISTS" : cfgTgToken.value,
             TELEGRAM_CHAT_ID: cfgTgChatId.value,
             OPENROUTER_API_KEY: cfgOrKey.value ? cfgOrKey.value : undefined,
+            GEMINI_API_KEY: cfgGeminiKey.value ? cfgGeminiKey.value : undefined,
+            HF_TOKEN: cfgHfToken.value ? cfgHfToken.value : undefined,
             APIFY_API_KEY: cfgApifyKey.value ? cfgApifyKey.value : undefined
         };
 

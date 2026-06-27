@@ -11,39 +11,55 @@ ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 
-# Read OpenRouter API key from environment variables or fallback to .env
+# Read API keys from environment variables or fallback to .env
 openrouter_key = os.environ.get("OPENROUTER_API_KEY")
-if not openrouter_key:
+gemini_key = os.environ.get("GEMINI_API_KEY")
+gemini_model = os.environ.get("GEMINI_MODEL", "gemini-1.5-pro")
+
+if not openrouter_key or not gemini_key:
     if os.path.exists("./.env"):
         try:
             with open("./.env") as f:
                 for line in f:
+                    line = line.strip()
                     if line.startswith("OPENROUTER_API_KEY="):
-                        openrouter_key = line.strip().split("=", 1)[1]
-                        break
+                        openrouter_key = line.split("=", 1)[1].strip()
+                    elif line.startswith("GEMINI_API_KEY="):
+                        gemini_key = line.split("=", 1)[1].strip()
+                    elif line.startswith("GEMINI_MODEL="):
+                        gemini_model = line.split("=", 1)[1].strip()
         except Exception:
             pass
 
-if not openrouter_key:
-    print("Error: OPENROUTER_API_KEY not configured in environment or .env file.")
+# Determine endpoint and credentials
+if gemini_key:
+    print("[LLM Configuration] Using direct Google Gemini API.")
+    url = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {gemini_key}",
+        "Content-Type": "application/json"
+    }
+    llm_model = gemini_model
+elif openrouter_key:
+    print("[LLM Configuration] Using OpenRouter API.")
+    url = "https://openrouter.ai/api/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {openrouter_key}",
+        "Content-Type": "application/json"
+    }
+    llm_model = "google/gemma-4-31b-it:free"
+else:
+    print("Error: Neither GEMINI_API_KEY nor OPENROUTER_API_KEY configured in environment or .env file.")
     exit(1)
 
-# API Endpoint URL for OpenRouter
-url = "https://openrouter.ai/api/v1/chat/completions"
-headers = {
-    "Authorization": f"Bearer {openrouter_key}",
-    "Content-Type": "application/json"
-}
-
 def call_gemini(system_prompt, prompt, max_tokens=4000):
-    # Rename to call_gemini to avoid altering downstream calls, but route to OpenRouter
     payload = {
-        "model": "google/gemma-4-31b-it:free",
+        "model": llm_model,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt}
         ],
-        "max_tokens": 4000
+        "max_tokens": max_tokens
     }
     
     req = urllib.request.Request(

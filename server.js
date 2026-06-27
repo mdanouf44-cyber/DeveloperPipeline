@@ -215,7 +215,9 @@ app.get('/api/status', (req, res) => {
         configLoaded: {
             telegramToken: !!process.env.TELEGRAM_BOT_TOKEN,
             telegramChatId: !!process.env.TELEGRAM_CHAT_ID,
-            openrouterKey: !!process.env.OPENROUTER_API_KEY
+            openrouterKey: !!process.env.OPENROUTER_API_KEY,
+            geminiKey: !!process.env.GEMINI_API_KEY,
+            hfToken: !!process.env.HF_TOKEN
         }
     });
 });
@@ -249,12 +251,14 @@ app.get('/api/config', (req, res) => {
         TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || "",
         TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID || "",
         OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY ? "EXISTS" : "",
+        GEMINI_API_KEY: process.env.GEMINI_API_KEY ? "EXISTS" : "",
+        HF_TOKEN: process.env.HF_TOKEN ? "EXISTS" : "",
         APIFY_API_KEY: process.env.APIFY_API_KEY ? "EXISTS" : ""
     });
 });
 
 app.post('/api/config', (req, res) => {
-    const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, OPENROUTER_API_KEY, APIFY_API_KEY } = req.body;
+    const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, OPENROUTER_API_KEY, GEMINI_API_KEY, HF_TOKEN, APIFY_API_KEY } = req.body;
     
     // Read, parse and write .env
     const envPath = path.join(__dirname, '.env');
@@ -267,6 +271,8 @@ app.post('/api/config', (req, res) => {
         TELEGRAM_BOT_TOKEN,
         TELEGRAM_CHAT_ID,
         OPENROUTER_API_KEY,
+        GEMINI_API_KEY,
+        HF_TOKEN,
         APIFY_API_KEY
     };
 
@@ -278,7 +284,7 @@ app.post('/api/config', (req, res) => {
         for (let key in updates) {
             if (line.trim().startsWith(`${key}=`)) {
                 // If it exists but is set to "EXISTS", do not overwrite it (protect passwords)
-                if (updates[key] === "EXISTS" && (key === "OPENROUTER_API_KEY" || key === "APIFY_API_KEY")) {
+                if (updates[key] === "EXISTS" && (key === "OPENROUTER_API_KEY" || key === "GEMINI_API_KEY" || key === "HF_TOKEN" || key === "APIFY_API_KEY")) {
                     newLines.push(line);
                 } else if (updates[key] !== undefined) {
                     newLines.push(`${key}=${updates[key]}`);
