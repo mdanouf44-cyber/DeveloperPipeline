@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const cfgTgChatId = document.getElementById('cfg-tg-chat-id');
     const cfgOrKey = document.getElementById('cfg-or-key');
     const cfgGeminiKey = document.getElementById('cfg-gemini-key');
-    const cfgHfToken = document.getElementById('cfg-hf-token');
+    const cfgNvidiaKey = document.getElementById('cfg-nvidia-key');
+    const cfgNvidiaModel = document.getElementById('cfg-nvidia-model');
     const cfgApifyKey = document.getElementById('cfg-apify-key');
 
     const consoleOutput = document.getElementById('terminal-output');
@@ -144,9 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.GEMINI_API_KEY) {
                 cfgGeminiKey.placeholder = "Key exists. Type here to overwrite.";
             }
-            if (data.HF_TOKEN) {
-                cfgHfToken.placeholder = "Key exists. Type here to overwrite.";
+            if (data.NVIDIA_API_KEY) {
+                cfgNvidiaKey.placeholder = "Key exists. Type here to overwrite.";
             }
+            cfgNvidiaModel.value = data.NVIDIA_MODEL || "";
             if (data.APIFY_API_KEY) {
                 cfgApifyKey.placeholder = "Key exists. Type here to overwrite.";
             }
@@ -211,7 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
             TELEGRAM_CHAT_ID: cfgTgChatId.value,
             OPENROUTER_API_KEY: cfgOrKey.value ? cfgOrKey.value : undefined,
             GEMINI_API_KEY: cfgGeminiKey.value ? cfgGeminiKey.value : undefined,
-            HF_TOKEN: cfgHfToken.value ? cfgHfToken.value : undefined,
+            NVIDIA_API_KEY: cfgNvidiaKey.value ? cfgNvidiaKey.value : undefined,
+            NVIDIA_MODEL: cfgNvidiaModel.value ? cfgNvidiaModel.value : undefined,
             APIFY_API_KEY: cfgApifyKey.value ? cfgApifyKey.value : undefined
         };
 

@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 const dotenv = require('dotenv');
+const https = require('https');
 
 dotenv.config();
 
@@ -63,6 +64,47 @@ function logToFile(message) {
     console.log(message);
 }
 
+// Telegram messaging helpers
+function sendTelegramDirect(chatId, text) {
+    if (!process.env.TELEGRAM_BOT_TOKEN || !chatId) return;
+    const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
+    const payload = JSON.stringify({
+        chat_id: chatId,
+        text: text,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true
+    });
+
+    const parsedUrl = new URL(url);
+    const options = {
+        hostname: parsedUrl.hostname,
+        path: parsedUrl.pathname,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(payload)
+        }
+    };
+
+    const req = https.request(options, (res) => {
+        res.on('data', () => {});
+    });
+    req.on('error', (err) => {
+        console.error("Telegram bot response error:", err.message);
+    });
+    req.write(payload);
+    req.end();
+}
+
+function htmlEscape(str) {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 // Run a list of commands sequentially
 function runPipeline(type) {
     if (pipelineState.running) {
@@ -73,6 +115,7 @@ function runPipeline(type) {
     pipelineState.running = true;
     pipelineState.currentTask = type;
     fs.writeFileSync(LOG_FILE_PATH, `=== Starting ${type.toUpperCase()} Pipeline Execution ===\n`);
+    sendTelegramDirect(process.env.TELEGRAM_CHAT_ID, `🚀 <b>Starting ${type.toUpperCase()} Pipeline Execution...</b>`);
 
     let steps = [];
     if (type === 'telegram') {
@@ -99,11 +142,13 @@ function runPipeline(type) {
             pipelineState.lastRunTime = new Date().toISOString();
             pipelineState.lastRunResult = 'success';
             logToFile(`=== ${type.toUpperCase()} Pipeline Completed Successfully! ===`);
+            sendTelegramDirect(process.env.TELEGRAM_CHAT_ID, `✅ <b>${type.toUpperCase()} Pipeline Completed Successfully!</b>`);
             return;
         }
 
         const step = steps[currentStep];
         logToFile(`\n[Step ${currentStep + 1}/${steps.length}] Starting: ${step.desc}...`);
+        sendTelegramDirect(process.env.TELEGRAM_CHAT_ID, `⏳ <b>[Step ${currentStep + 1}/${steps.length}]</b> ${step.desc}...`);
         
         const env = { ...process.env };
         if (step.useNodePath) {
@@ -141,6 +186,7 @@ function runPipeline(type) {
                 pipelineState.lastRunTime = new Date().toISOString();
                 pipelineState.lastRunResult = 'failed';
                 logToFile(`=== ${type.toUpperCase()} Pipeline Failed at Step: ${step.desc} (Exit Code: ${code}) ===`);
+                sendTelegramDirect(process.env.TELEGRAM_CHAT_ID, `❌ <b>Pipeline Failed</b> at step: <i>${step.desc}</i> (Exit Code: ${code})`);
             }
         });
 
@@ -150,6 +196,7 @@ function runPipeline(type) {
             pipelineState.lastRunTime = new Date().toISOString();
             pipelineState.lastRunResult = 'failed';
             logToFile(`=== ${type.toUpperCase()} Pipeline Encountered Error: ${err.message} ===`);
+            sendTelegramDirect(process.env.TELEGRAM_CHAT_ID, `❌ <b>Pipeline Error:</b> <code>${err.message}</code>`);
         });
     }
 
@@ -205,7 +252,25 @@ function initScheduler() {
 // Initialize Scheduler on Start
 initScheduler();
 
-// API Endpoints
+// Automatically configure Telegram Webhook if running on Render
+const RENDER_URL = process.env.RENDER_EXTERNAL_URL;
+if (RENDER_URL && process.env.TELEGRAM_BOT_TOKEN) {
+    const webhookUrl = `${RENDER_URL}/api/telegram-webhook`;
+    const setupUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/setWebhook?url=${encodeURIComponent(webhookUrl)}`;
+    
+    logToFile(`[Telegram Bot] Registering webhook at: ${webhookUrl}`);
+    https.get(setupUrl, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+            logToFile(`[Telegram Bot] Webhook setup completed. Response: ${data}`);
+        });
+    }).on('error', (err) => {
+        console.error("[Telegram Bot] Webhook setup failed:", err.message);
+    });
+} else {
+    logToFile("[Telegram Bot] Webhook skip: RENDER_EXTERNAL_URL or TELEGRAM_BOT_TOKEN not set.");
+}
 app.get('/api/status', (req, res) => {
     const config = loadSchedulerConfig();
     res.json({
@@ -217,7 +282,8 @@ app.get('/api/status', (req, res) => {
             telegramChatId: !!process.env.TELEGRAM_CHAT_ID,
             openrouterKey: !!process.env.OPENROUTER_API_KEY,
             geminiKey: !!process.env.GEMINI_API_KEY,
-            hfToken: !!process.env.HF_TOKEN
+            nvidiaKey: !!process.env.NVIDIA_API_KEY,
+            nvidiaModel: process.env.NVIDIA_MODEL || ""
         }
     });
 });
@@ -245,6 +311,54 @@ app.get('/api/logs', (req, res) => {
     }
 });
 
+// Interactive Telegram Webhook Endpoint
+app.post('/api/telegram-webhook', (req, res) => {
+    // Respond 200 OK immediately to acknowledge receipt to Telegram
+    res.sendStatus(200);
+
+    const update = req.body;
+    if (!update || !update.message) return;
+
+    const message = update.message;
+    const chatId = message.chat.id.toString();
+    const text = message.text ? message.text.trim() : '';
+
+    // Authorization check
+    const authorizedChatId = process.env.TELEGRAM_CHAT_ID;
+    if (!authorizedChatId || chatId !== authorizedChatId.toString()) {
+        logToFile(`[Telegram Bot] Unauthorized access attempt from Chat ID: ${chatId}`);
+        sendTelegramDirect(chatId, "⚠️ <b>Unauthorized.</b> You do not have access to manage this pipeline.");
+        return;
+    }
+
+    if (text === '/start' || text === '/help') {
+        const helpText = `🤖 <b>Mohammad Anouf Saani Pipeline Bot</b>\n\nUse these commands to manage your pipeline:\n\n👉 /run - Trigger the Daily Telegram Pipeline (Generate & Deliver)\n👉 /status - Check the current pipeline run status\n👉 /logs - Get the last 15 lines of console logs\n👉 /help - Show this menu`;
+        sendTelegramDirect(chatId, helpText);
+    } else if (text === '/run') {
+        if (pipelineState.running) {
+            sendTelegramDirect(chatId, "⚠️ <b>Pipeline is already running</b> another task.");
+        } else {
+            sendTelegramDirect(chatId, "🚀 <b>Pipeline Triggered!</b> Generating content, slides, PDF, and infographics. I will deliver the results directly to this channel when finished.");
+            setTimeout(() => runPipeline('telegram'), 100);
+        }
+    } else if (text === '/status') {
+        const lastRun = pipelineState.lastRunTime ? new Date(pipelineState.lastRunTime).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }) : 'N/A';
+        const statusText = `ℹ️ <b>Pipeline Status:</b>\n• <b>Current State:</b> <code>${pipelineState.running ? 'RUNNING (' + pipelineState.currentTask.toUpperCase() + ')' : 'IDLE'}</code>\n• <b>Last Run Time:</b> <code>${lastRun}</code>\n• <b>Last Run Result:</b> <code>${pipelineState.lastRunResult ? pipelineState.lastRunResult.toUpperCase() : 'NONE'}</code>`;
+        sendTelegramDirect(chatId, statusText);
+    } else if (text === '/logs') {
+        if (fs.existsSync(LOG_FILE_PATH)) {
+            const logs = fs.readFileSync(LOG_FILE_PATH, 'utf8');
+            const lines = logs.trim().split('\n');
+            const lastLines = lines.slice(-15).join('\n');
+            sendTelegramDirect(chatId, `📋 <b>Recent Console Logs:</b>\n<pre>${htmlEscape(lastLines)}</pre>`);
+        } else {
+            sendTelegramDirect(chatId, "📋 No logs found.");
+        }
+    } else {
+        sendTelegramDirect(chatId, "❓ <b>Unknown command.</b> Type /help to see all available commands.");
+    }
+});
+
 app.get('/api/config', (req, res) => {
     // Read current environment keys
     res.json({
@@ -252,13 +366,14 @@ app.get('/api/config', (req, res) => {
         TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID || "",
         OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY ? "EXISTS" : "",
         GEMINI_API_KEY: process.env.GEMINI_API_KEY ? "EXISTS" : "",
-        HF_TOKEN: process.env.HF_TOKEN ? "EXISTS" : "",
+        NVIDIA_API_KEY: process.env.NVIDIA_API_KEY ? "EXISTS" : "",
+        NVIDIA_MODEL: process.env.NVIDIA_MODEL || "meta/llama-3.3-70b-instruct",
         APIFY_API_KEY: process.env.APIFY_API_KEY ? "EXISTS" : ""
     });
 });
 
 app.post('/api/config', (req, res) => {
-    const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, OPENROUTER_API_KEY, GEMINI_API_KEY, HF_TOKEN, APIFY_API_KEY } = req.body;
+    const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, OPENROUTER_API_KEY, GEMINI_API_KEY, NVIDIA_API_KEY, NVIDIA_MODEL, APIFY_API_KEY } = req.body;
     
     // Read, parse and write .env
     const envPath = path.join(__dirname, '.env');
@@ -272,7 +387,8 @@ app.post('/api/config', (req, res) => {
         TELEGRAM_CHAT_ID,
         OPENROUTER_API_KEY,
         GEMINI_API_KEY,
-        HF_TOKEN,
+        NVIDIA_API_KEY,
+        NVIDIA_MODEL,
         APIFY_API_KEY
     };
 
@@ -284,7 +400,7 @@ app.post('/api/config', (req, res) => {
         for (let key in updates) {
             if (line.trim().startsWith(`${key}=`)) {
                 // If it exists but is set to "EXISTS", do not overwrite it (protect passwords)
-                if (updates[key] === "EXISTS" && (key === "OPENROUTER_API_KEY" || key === "GEMINI_API_KEY" || key === "HF_TOKEN" || key === "APIFY_API_KEY")) {
+                if (updates[key] === "EXISTS" && (key === "OPENROUTER_API_KEY" || key === "GEMINI_API_KEY" || key === "NVIDIA_API_KEY" || key === "APIFY_API_KEY")) {
                     newLines.push(line);
                 } else if (updates[key] !== undefined) {
                     newLines.push(`${key}=${updates[key]}`);
