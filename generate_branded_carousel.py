@@ -125,7 +125,7 @@ data = {
     "6": (t6, {
         "{{BRAND_COLOR}}": color,
         "{{HEADER_LABEL}}": "THE REALITY",
-        "{{HUGE_STAT": "100%",
+        "{{HUGE_STAT}}": "100%",
         "{{HEADLINE_PART_1}}": "Ideas are cheap,",
         "{{HEADLINE_PART_2}}": "execution is the only",
         "{{HEADLINE_EMPHASIS}}": "currency",

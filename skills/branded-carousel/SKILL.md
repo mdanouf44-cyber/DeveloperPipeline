@@ -505,22 +505,42 @@ Select the color and use it as `{{BRAND_COLOR}}` in all CSS blocks below.
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { width: 1080px; height: 1080px; overflow: hidden; background-color: #F8F7F3; color: #111111; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; }
   
+  /* Noise overlay */
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.015'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+  }
+  
   .header { position: absolute; top: 60px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-  .header-left { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #111111; }
+  .header-left { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #0F172A; }
   .star-icon { width: 24px; height: 24px; }
   .header-right { display: flex; align-items: center; gap: 15px; }
-  .fw-text { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 26px; color: #999999; }
-  .slide-badge { width: 44px; height: 44px; background-color: {{BRAND_COLOR}}; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 800; font-size: 16px; }
+  .fw-text { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 26px; color: #94A3B8; }
+  .slide-badge { width: 44px; height: 44px; background-color: {{BRAND_COLOR}}; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 800; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-  .content { position: absolute; top: 260px; left: 70px; right: 70px; z-index: 5; }
-  .headline { font-size: 85px; font-weight: 900; letter-spacing: -3px; line-height: 1.05; }
+  .content { position: absolute; top: 220px; left: 70px; right: 70px; z-index: 5; }
+  .headline { font-size: 80px; font-weight: 900; letter-spacing: -3px; line-height: 1.1; color: #0F172A; }
   .headline em { font-family: 'Instrument Serif', serif; font-style: italic; color: {{BRAND_COLOR}}; font-weight: 400; letter-spacing: 0; padding-left: 5px; }
 
-  .bottom-area { position: absolute; bottom: 70px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
+  .bottom-area { position: absolute; bottom: 80px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 5; }
   .s1-bottom { display: flex; gap: 40px; align-items: center; }
-  .s1-image { width: 340px; height: 340px; object-fit: cover; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-  .bottom-text { font-size: 28px; font-weight: 500; color: #333333; line-height: 1.4; max-width: 480px; }
-  .swipe { font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #111111; }
+  
+  /* Browser Mock frame */
+  .browser-mock { width: 340px; height: 340px; background: #FFFFFF; border-radius: 16px; border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12); overflow: hidden; display: flex; flex-direction: column; }
+  .browser-bar { height: 28px; background: #F8FAFC; display: flex; align-items: center; padding: 0 14px; gap: 6px; border-bottom: 1px solid rgba(15, 23, 42, 0.06); }
+  .browser-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-red { background: #EF4444; }
+  .dot-yellow { background: #F59E0B; }
+  .dot-green { background: #10B981; }
+  .browser-content { flex: 1; overflow: hidden; }
+  .browser-content img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+
+  .bottom-text { font-size: 26px; font-weight: 500; color: #475569; line-height: 1.5; max-width: 480px; }
+  .swipe { font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #0F172A; margin-bottom: 15px; }
 </style>
 </head>
 <body>
@@ -540,7 +560,16 @@ Select the color and use it as `{{BRAND_COLOR}}` in all CSS blocks below.
   </div>
   <div class="bottom-area">
     <div class="s1-bottom">
-      <img src="assets/hero-ui.png" class="s1-image" onerror="this.src='assets/interface.png'"/>
+      <div class="browser-mock">
+        <div class="browser-bar">
+          <div class="browser-dot dot-red"></div>
+          <div class="browser-dot dot-yellow"></div>
+          <div class="browser-dot dot-green"></div>
+        </div>
+        <div class="browser-content">
+          <img src="assets/hero-ui.png" onerror="this.src='assets/interface.png'"/>
+        </div>
+      </div>
       <div class="bottom-text">{{SUBTITLE}}</div>
     </div>
     <div class="swipe">SWIPE &rarr;</div>
@@ -566,43 +595,66 @@ Select the color and use it as `{{BRAND_COLOR}}` in all CSS blocks below.
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { width: 1080px; height: 1080px; overflow: hidden; background-color: #F8F7F3; color: #111111; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; }
   
-  .top-image-container { position: absolute; top: 0; left: 0; right: 0; height: 320px; z-index: 1; }
-  .top-image { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; filter: brightness(0.95); }
-  .image-fade { position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(to bottom, transparent, #F8F7F3); }
+  /* Noise overlay */
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.015'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+  }
 
-  .pill-header { position: absolute; top: 60px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-  .pill-left { display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.65); padding: 12px 24px; border-radius: 40px; color: white; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
-  .pill-badge { width: 44px; height: 44px; background-color: rgba(0,0,0,0.65); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 800; font-size: 16px; }
+  .header { position: absolute; top: 60px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+  .header-left { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #0F172A; }
+  .header-right { display: flex; align-items: center; gap: 15px; }
+  .fw-text { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 26px; color: #94A3B8; }
+  .slide-badge { width: 44px; height: 44px; background-color: {{BRAND_COLOR}}; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 800; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-  .content { position: absolute; top: 380px; left: 70px; right: 70px; z-index: 5; }
-  .eyebrow { font-size: 18px; font-weight: 800; color: {{BRAND_COLOR}}; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
-  .headline.medium { font-size: 65px; font-weight: 900; letter-spacing: -2px; line-height: 1.05; }
-  .headline.medium em { font-family: 'Instrument Serif', serif; font-style: italic; color: {{BRAND_COLOR}}; font-weight: 400; padding-left: 5px; }
-  .subhead { font-size: 32px; font-weight: 700; color: #555555; margin-top: 25px; line-height: 1.3; }
+  .content { position: absolute; top: 150px; left: 70px; right: 70px; z-index: 5; }
+  .eyebrow { font-size: 16px; font-weight: 800; color: {{BRAND_COLOR}}; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+  .headline { font-size: 55px; font-weight: 900; letter-spacing: -2px; line-height: 1.1; color: #0F172A; }
+  .headline em { font-family: 'Instrument Serif', serif; font-style: italic; color: {{BRAND_COLOR}}; font-weight: 400; padding-left: 5px; }
+  .subhead { font-size: 24px; font-weight: 600; color: #64748B; margin-top: 10px; line-height: 1.4; }
+
+  /* Centered Browser Mock */
+  .browser-mock { position: absolute; top: 380px; left: 70px; right: 70px; height: 450px; background: #FFFFFF; border-radius: 18px; border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 25px 60px rgba(15, 23, 42, 0.15); overflow: hidden; display: flex; flex-direction: column; z-index: 5; }
+  .browser-bar { height: 32px; background: #F8FAFC; display: flex; align-items: center; padding: 0 16px; gap: 8px; border-bottom: 1px solid rgba(15, 23, 42, 0.06); }
+  .browser-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #EF4444; }
+  .dot-yellow { background: #F59E0B; }
+  .dot-green { background: #10B981; }
+  .browser-content { flex: 1; overflow: hidden; background: #0F172A; }
+  .browser-content img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
 
   .bottom-area { position: absolute; bottom: 70px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 5; }
-  .bottom-text { font-size: 26px; font-weight: 500; color: #333333; line-height: 1.4; max-width: 750px; }
-  .swipe { font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #111111; }
+  .bottom-text { font-size: 24px; font-weight: 500; color: #475569; line-height: 1.4; max-width: 800px; }
+  .swipe { font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #0F172A; }
 </style>
 </head>
 <body>
-  <div class="top-image-container">
-    <!-- Replace interface.png with hero-ui.png for slide 4 -->
-    <img src="assets/interface.png" class="top-image" onerror="this.style.display='none'"/>
-    <div class="image-fade"></div>
-  </div>
-  <div class="pill-header">
-    <div class="pill-left">
+  <div class="header">
+    <div class="header-left">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 0L13.5 10.5L24 12L13.5 13.5L12 24L10.5 13.5L0 12L10.5 10.5L12 0Z" fill="{{BRAND_COLOR}}"/><path d="M4.5 4.5L10.5 10.5M19.5 19.5L13.5 13.5M19.5 4.5L13.5 10.5M4.5 19.5L10.5 13.5" stroke="{{BRAND_COLOR}}" stroke-width="2"/></svg>
       {{PILL_LABEL}}
     </div>
-    <div class="pill-badge">{{SLIDE_NUM}}</div>
+    <div class="slide-badge">{{SLIDE_NUM}}</div>
   </div>
   <div class="content">
     <div class="eyebrow">{{EYEBROW}}</div>
-    <div class="headline medium">{{HEADLINE_PART_1}}</div>
-    <div class="headline medium">{{HEADLINE_PART_2}} <em>{{HEADLINE_EMPHASIS}}.</em></div>
+    <div class="headline">{{HEADLINE_PART_1}}</div>
+    <div class="headline" style="margin-top: -5px;">{{HEADLINE_PART_2}} <em>{{HEADLINE_EMPHASIS}}.</em></div>
     <div class="subhead">{{SUBHEAD}}</div>
+  </div>
+  <div class="browser-mock">
+    <div class="browser-bar">
+      <div class="browser-dot dot-red"></div>
+      <div class="browser-dot dot-yellow"></div>
+      <div class="browser-dot dot-green"></div>
+    </div>
+    <div class="browser-content">
+      <img src="assets/interface.png" onerror="this.src='assets/hero-ui.png'"/>
+    </div>
   </div>
   <div class="bottom-area">
     <div class="bottom-text">{{BODY_TEXT}}</div>
@@ -629,26 +681,37 @@ Select the color and use it as `{{BRAND_COLOR}}` in all CSS blocks below.
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { width: 1080px; height: 1080px; overflow: hidden; background-color: #F8F7F3; color: #111111; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; }
   
+  /* Noise overlay */
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.015'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+  }
+
   .header { position: absolute; top: 60px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-  .header-left { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #111111; }
+  .header-left { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #0F172A; }
   .header-right { display: flex; align-items: center; gap: 15px; }
-  .fw-text { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 26px; color: #999999; }
-  .slide-badge { width: 44px; height: 44px; background-color: {{BRAND_COLOR}}; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 800; font-size: 16px; }
+  .fw-text { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 26px; color: #94A3B8; }
+  .slide-badge { width: 44px; height: 44px; background-color: {{BRAND_COLOR}}; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 800; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-  .content { position: absolute; top: 300px; left: 70px; right: 70px; z-index: 5; }
-  .huge-number { font-size: 200px; font-weight: 900; letter-spacing: -8px; line-height: 0.9; margin-bottom: 10px; display: inline-block; }
+  .content { position: absolute; top: 220px; left: 70px; right: 70px; z-index: 5; }
   
-  .badge-container { display: inline-flex; align-items: center; justify-content: center; vertical-align: top; margin-left: 20px; margin-top: 15px; }
-  .thick-circle { width: 150px; height: 150px; border: 12px solid {{BRAND_COLOR}}; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-  .circle-text { font-size: 24px; font-weight: 900; line-height: 1; }
-  .circle-sub { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 22px; color: #888; margin-top: 4px; }
+  /* Number row layout */
+  .stat-row { display: flex; align-items: center; gap: 30px; margin-bottom: 30px; }
+  .huge-number { font-size: 220px; font-weight: 900; letter-spacing: -8px; line-height: 0.8; color: #0F172A; }
+  .thick-circle { width: 140px; height: 140px; border: 12px solid {{BRAND_COLOR}}; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #FFFFFF; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05); }
+  .circle-text { font-size: 22px; font-weight: 900; color: #0F172A; text-transform: uppercase; letter-spacing: -0.5px; }
+  .circle-sub { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 20px; color: {{BRAND_COLOR}}; margin-top: 2px; }
   
-  .headline.medium { font-size: 65px; font-weight: 900; letter-spacing: -2px; line-height: 1.05; }
-  .headline.medium em { font-family: 'Instrument Serif', serif; font-style: italic; color: {{BRAND_COLOR}}; font-weight: 400; padding-left: 5px; }
+  .headline { font-size: 55px; font-weight: 900; letter-spacing: -2px; line-height: 1.1; color: #0F172A; }
+  .headline em { font-family: 'Instrument Serif', serif; font-style: italic; color: {{BRAND_COLOR}}; font-weight: 400; padding-left: 5px; }
 
-  .bottom-area { position: absolute; bottom: 70px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 5; }
-  .bottom-text { font-size: 26px; font-weight: 500; color: #333333; line-height: 1.4; max-width: 750px; }
-  .swipe { font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #111111; }
+  .bottom-area { position: absolute; bottom: 80px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 5; }
+  .bottom-text { font-size: 26px; font-weight: 500; color: #475569; line-height: 1.4; max-width: 750px; }
+  .swipe { font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #0F172A; }
 </style>
 </head>
 <body>
@@ -663,17 +726,15 @@ Select the color and use it as `{{BRAND_COLOR}}` in all CSS blocks below.
     </div>
   </div>
   <div class="content">
-    <div>
+    <div class="stat-row">
       <div class="huge-number">{{HUGE_STAT}}</div>
-      <div class="badge-container">
-        <div class="thick-circle">
-          <div class="circle-text">{{CIRCLE_WORD_1}}</div>
-          <div class="circle-sub">{{CIRCLE_WORD_2}}</div>
-        </div>
+      <div class="thick-circle">
+        <div class="circle-text">{{CIRCLE_WORD_1}}</div>
+        <div class="circle-sub">{{CIRCLE_WORD_2}}</div>
       </div>
     </div>
-    <div class="headline medium" style="margin-top: 20px;">{{HEADLINE_PART_1}}</div>
-    <div class="headline medium">{{HEADLINE_PART_2}} <em>{{HEADLINE_EMPHASIS}}.</em></div>
+    <div class="headline">{{HEADLINE_PART_1}}</div>
+    <div class="headline" style="margin-top: -5px;">{{HEADLINE_PART_2}} <em>{{HEADLINE_EMPHASIS}}.</em></div>
   </div>
   <div class="bottom-area">
     <div class="bottom-text">{{BODY_TEXT}}</div>
@@ -700,26 +761,44 @@ Select the color and use it as `{{BRAND_COLOR}}` in all CSS blocks below.
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { width: 1080px; height: 1080px; overflow: hidden; background-color: #F8F7F3; color: #111111; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; }
   
+  /* Noise overlay */
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.015'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+  }
+
   .header { position: absolute; top: 60px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-  .header-left { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #111111; }
+  .header-left { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #0F172A; }
   .header-right { display: flex; align-items: center; gap: 15px; }
-  .fw-text { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 26px; color: #999999; }
-  .slide-badge { width: 44px; height: 44px; background-color: {{BRAND_COLOR}}; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 800; font-size: 16px; }
+  .fw-text { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 26px; color: #94A3B8; }
+  .slide-badge { width: 44px; height: 44px; background-color: {{BRAND_COLOR}}; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 800; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
   .content { position: absolute; top: 220px; left: 70px; right: 70px; z-index: 5; }
-  .s6-container { display: flex; justify-content: space-between; align-items: center; margin-top: 50px; }
-  .s6-left { flex: 1; padding-right: 40px; }
+  .s6-container { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; }
+  .s6-left { width: 480px; padding-right: 20px; }
   
-  .huge-number { font-size: 160px; font-weight: 900; letter-spacing: -6px; line-height: 0.9; margin-bottom: 10px; }
-  .headline.medium { font-size: 55px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.1; }
-  .headline.medium em { font-family: 'Instrument Serif', serif; font-style: italic; color: {{BRAND_COLOR}}; font-weight: 400; padding-left: 5px; }
-  .subhead { font-size: 26px; font-weight: 700; color: #555555; margin-top: 15px; }
+  .huge-number { font-size: 170px; font-weight: 900; letter-spacing: -6px; line-height: 0.85; color: #0F172A; margin-bottom: 20px; }
+  .headline { font-size: 50px; font-weight: 900; letter-spacing: -2px; line-height: 1.1; color: #0F172A; }
+  .headline em { font-family: 'Instrument Serif', serif; font-style: italic; color: {{BRAND_COLOR}}; font-weight: 400; padding-left: 5px; }
+  .subhead { font-size: 24px; font-weight: 700; color: #64748B; margin-top: 15px; line-height: 1.4; }
 
-  .s6-image { width: 420px; height: 420px; object-fit: cover; border-radius: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+  /* Right Column Browser Mock */
+  .browser-mock { width: 440px; height: 440px; background: #FFFFFF; border-radius: 20px; border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12); overflow: hidden; display: flex; flex-direction: column; }
+  .browser-bar { height: 28px; background: #F8FAFC; display: flex; align-items: center; padding: 0 14px; gap: 6px; border-bottom: 1px solid rgba(15, 23, 42, 0.06); }
+  .browser-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-red { background: #EF4444; }
+  .dot-yellow { background: #F59E0B; }
+  .dot-green { background: #10B981; }
+  .browser-content { flex: 1; overflow: hidden; background: #0F172A; }
+  .browser-content img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
   
-  .bottom-area { position: absolute; bottom: 70px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 5; }
-  .bottom-text { font-size: 26px; font-weight: 500; color: #333333; line-height: 1.4; max-width: 750px; }
-  .swipe { font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #111111; }
+  .bottom-area { position: absolute; bottom: 80px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 5; }
+  .bottom-text { font-size: 26px; font-weight: 500; color: #475569; line-height: 1.4; max-width: 750px; }
+  .swipe { font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #0F172A; }
 </style>
 </head>
 <body>
@@ -737,11 +816,20 @@ Select the color and use it as `{{BRAND_COLOR}}` in all CSS blocks below.
     <div class="s6-container">
       <div class="s6-left">
         <div class="huge-number">{{HUGE_STAT}}</div>
-        <div class="headline medium">{{HEADLINE_PART_1}}</div>
-        <div class="headline medium">{{HEADLINE_PART_2}} <em>{{HEADLINE_EMPHASIS}}.</em></div>
+        <div class="headline">{{HEADLINE_PART_1}}</div>
+        <div class="headline" style="margin-top: -5px;">{{HEADLINE_PART_2}} <em>{{HEADLINE_EMPHASIS}}.</em></div>
         <div class="subhead">{{SUBHEAD}}</div>
       </div>
-      <img src="assets/hero-ui.png" class="s6-image" onerror="this.src='assets/interface.png'"/>
+      <div class="browser-mock">
+        <div class="browser-bar">
+          <div class="browser-dot dot-red"></div>
+          <div class="browser-dot dot-yellow"></div>
+          <div class="browser-dot dot-green"></div>
+        </div>
+        <div class="browser-content">
+          <img src="assets/hero-ui.png" onerror="this.src='assets/interface.png'"/>
+        </div>
+      </div>
     </div>
   </div>
   <div class="bottom-area">
@@ -769,22 +857,34 @@ Select the color and use it as `{{BRAND_COLOR}}` in all CSS blocks below.
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { width: 1080px; height: 1080px; overflow: hidden; background-color: #F8F7F3; color: #111111; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; }
   
-  .header { position: absolute; top: 60px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-  .header-left { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #111111; }
-  .header-right { display: flex; align-items: center; gap: 15px; }
-  .fw-text { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 26px; color: #999999; }
-  .slide-badge { width: 44px; height: 44px; background-color: {{BRAND_COLOR}}; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 800; font-size: 16px; }
+  /* Noise overlay */
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.015'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+  }
 
-  .content { position: absolute; top: 280px; left: 70px; right: 70px; z-index: 5; }
-  .headline { font-size: 85px; font-weight: 900; letter-spacing: -3px; line-height: 1.05; }
+  .header { position: absolute; top: 60px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+  .header-left { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #0F172A; }
+  .header-right { display: flex; align-items: center; gap: 15px; }
+  .fw-text { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 26px; color: #94A3B8; }
+  .slide-badge { width: 44px; height: 44px; background-color: {{BRAND_COLOR}}; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 800; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+  .content { position: absolute; top: 250px; left: 70px; right: 70px; z-index: 5; }
+  .headline { font-size: 80px; font-weight: 900; letter-spacing: -3px; line-height: 1.1; color: #0F172A; }
   .headline em { font-family: 'Instrument Serif', serif; font-style: italic; color: {{BRAND_COLOR}}; font-weight: 400; padding-left: 5px; }
   
-  .s7-line { width: 60px; height: 4px; background-color: {{BRAND_COLOR}}; margin: 40px 0; }
-  .subhead { font-size: 32px; font-weight: 600; color: #555555; max-width: 900px; line-height: 1.4; }
+  .s7-line { width: 80px; height: 6px; background-color: {{BRAND_COLOR}}; margin: 40px 0; border-radius: 3px; }
+  .subhead { font-size: 32px; font-weight: 600; color: #475569; max-width: 900px; line-height: 1.5; }
 
-  .bottom-area { position: absolute; bottom: 80px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 5; }
-  .s7-pill { background-color: #111111; color: white; padding: 20px 40px; border-radius: 50px; font-size: 20px; font-weight: 800; display: inline-block; letter-spacing: -0.5px; }
-  .s7-pill em { font-family: 'Instrument Serif', serif; font-style: italic; color: {{BRAND_COLOR}}; font-weight: 400; margin-left: 5px; font-size: 24px; }
+  .bottom-area { position: absolute; bottom: 90px; left: 70px; right: 70px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 5; }
+  
+  /* Polished Pill Button */
+  .s7-pill { background-color: #0F172A; color: white; padding: 22px 48px; border-radius: 50px; font-size: 22px; font-weight: 800; display: inline-block; letter-spacing: -0.5px; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15); text-transform: uppercase; }
+  .s7-pill em { font-family: 'Instrument Serif', serif; font-style: italic; color: {{BRAND_COLOR}}; font-weight: 400; margin-left: 8px; font-size: 26px; text-transform: none; }
 </style>
 </head>
 <body>
@@ -800,7 +900,7 @@ Select the color and use it as `{{BRAND_COLOR}}` in all CSS blocks below.
   </div>
   <div class="content">
     <div class="headline">{{HEADLINE_PART_1}}</div>
-    <div class="headline">{{HEADLINE_PART_2}} <em>{{HEADLINE_EMPHASIS}}.</em></div>
+    <div class="headline" style="margin-top: -5px;">{{HEADLINE_PART_2}} <em>{{HEADLINE_EMPHASIS}}.</em></div>
     <div class="s7-line"></div>
     <div class="subhead">{{SUBHEAD}}</div>
   </div>
