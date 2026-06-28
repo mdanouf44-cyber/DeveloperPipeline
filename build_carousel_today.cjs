@@ -23,7 +23,11 @@ const { execSync } = require('child_process');
           '--password-store=basic',
           '--disable-extensions',
           '--disable-component-update',
-          '--no-default-browser-check'
+          '--no-default-browser-check',
+          '--single-process',
+          '--no-zygote',
+          '--js-flags="--max-old-space-size=128"',
+          '--disable-features=site-per-process'
         ]
     });
     const page = await browser.newPage();
@@ -47,15 +51,20 @@ const { execSync } = require('child_process');
     }
     pdfHtml += `</body></html>`;
 
-    await page.setContent(pdfHtml);
+    // Close the slides tab to free up GPU and canvas memory before starting the PDF compilation
+    await page.close();
+
+    const pdfPage = await browser.newPage();
+    await pdfPage.setContent(pdfHtml);
     const pdfPath = `${outDir}/linkedin-carousel-${d}.pdf`;
-    await page.pdf({ 
+    await pdfPage.pdf({ 
         path: pdfPath, 
         width: 1080,
         height: 1080,
         printBackground: true 
     });
     console.log(`Generated PDF at ${pdfPath}`);
+    await pdfPage.close();
 
     // Also copy to slack_downloads so the scheduler can find it
     const destDir = path.resolve(__dirname, './slack_downloads');

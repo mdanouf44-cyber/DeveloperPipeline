@@ -54,8 +54,8 @@ function loadSchedulerConfig() {
     }
 }
 
-// Clear log file on startup
-fs.writeFileSync(LOG_FILE_PATH, `--- Pipeline Logger Initialized ---\n`);
+// Append log file on startup to preserve logs across restarts
+fs.appendFileSync(LOG_FILE_PATH, `--- Pipeline Logger Initialized ---\n`);
 
 function logToFile(message) {
     const timeStr = new Date().toISOString();

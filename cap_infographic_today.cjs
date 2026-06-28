@@ -15,7 +15,11 @@ const path = require('path');
       '--password-store=basic',
       '--disable-extensions',
       '--disable-component-update',
-      '--no-default-browser-check'
+      '--no-default-browser-check',
+      '--single-process',
+      '--no-zygote',
+      '--js-flags="--max-old-space-size=128"',
+      '--disable-features=site-per-process'
     ]
   });
   const page = await browser.newPage();
