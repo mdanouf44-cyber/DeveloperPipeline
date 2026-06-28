@@ -16,10 +16,7 @@ const path = require('path');
       '--disable-extensions',
       '--disable-component-update',
       '--no-default-browser-check',
-      '--single-process',
-      '--no-zygote',
-      '--js-flags="--max-old-space-size=128"',
-      '--disable-features=site-per-process'
+      '--disable-web-security'
     ]
   });
   const page = await browser.newPage();

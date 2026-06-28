@@ -24,10 +24,7 @@ const { execSync } = require('child_process');
           '--disable-extensions',
           '--disable-component-update',
           '--no-default-browser-check',
-          '--single-process',
-          '--no-zygote',
-          '--js-flags="--max-old-space-size=128"',
-          '--disable-features=site-per-process'
+          '--disable-web-security'
         ]
     });
     // Process all 7 slides using a fresh page per slide to avoid memory accumulation
@@ -44,12 +41,11 @@ const { execSync } = require('child_process');
         await page.close(); // Release all memory from this slide tab immediately
     }
 
-    // Now compile into PDF
+    // Now compile into PDF using direct file protocol links for PNG images (thanks to --disable-web-security)
     let pdfHtml = `<html><body style="margin:0;padding:0;">`;
     for (let i = 1; i <= 7; i++) {
-        const pngPath = `${outDir}/slide-0${i}.png`;
-        const base64Image = fs.readFileSync(pngPath).toString('base64');
-        pdfHtml += `<img src="data:image/png;base64,${base64Image}" style="width:1080px;height:1080px;display:block;page-break-after:always;">`;
+        const pngPath = path.resolve(outDir, `slide-0${i}.png`).replace(/\\/g, '/');
+        pdfHtml += `<img src="file://${pngPath}" style="width:1080px;height:1080px;display:block;page-break-after:always;">`;
     }
     pdfHtml += `</body></html>`;
 
