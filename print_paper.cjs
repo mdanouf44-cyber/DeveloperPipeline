@@ -21,7 +21,11 @@ const path = require('path');
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-web-security',
-      '--disable-gpu'
+      '--disable-gpu',
+      '--single-process',
+      '--no-zygote',
+      '--js-flags="--max-old-space-size=128"',
+      '--disable-features=site-per-process'
     ]
   });
 

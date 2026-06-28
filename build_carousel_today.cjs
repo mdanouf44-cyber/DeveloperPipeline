@@ -30,16 +30,18 @@ const { execSync } = require('child_process');
           '--disable-features=site-per-process'
         ]
     });
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1080, height: 1080, deviceScaleFactor: 2 });
-
-    // Process all 7 slides
+    // Process all 7 slides using a fresh page per slide to avoid memory accumulation
     for (let i = 1; i <= 7; i++) {
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1080, height: 1080, deviceScaleFactor: 2 });
+        
         const slidePath = `file://${path.resolve(__dirname, './carousel-routine/temp/carousel-branded/slide-0' + i + '.html')}`;
         await page.goto(slidePath, { waitUntil: 'networkidle0' });
         const pngPath = `${outDir}/slide-0${i}.png`;
         await page.screenshot({ path: pngPath });
         console.log(`Generated ${pngPath}`);
+        
+        await page.close(); // Release all memory from this slide tab immediately
     }
 
     // Now compile into PDF
@@ -50,9 +52,6 @@ const { execSync } = require('child_process');
         pdfHtml += `<img src="data:image/png;base64,${base64Image}" style="width:1080px;height:1080px;display:block;page-break-after:always;">`;
     }
     pdfHtml += `</body></html>`;
-
-    // Close the slides tab to free up GPU and canvas memory before starting the PDF compilation
-    await page.close();
 
     const pdfPage = await browser.newPage();
     await pdfPage.setContent(pdfHtml);
