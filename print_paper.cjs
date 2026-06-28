@@ -30,10 +30,21 @@ const path = require('path');
   // Set viewport to A4 aspect ratio representation
   await page.setViewport({ width: 1200, height: 1600 });
 
-  await page.goto('file://' + absoluteHtmlPath, { waitUntil: 'domcontentloaded' });
+  try {
+    await page.goto('file://' + absoluteHtmlPath, { waitUntil: 'domcontentloaded', timeout: 5000 });
+  } catch (e) {
+    console.log("Navigation timeout or warning, proceeding to print PDF anyway:", e.message);
+  }
 
-  // Wait for web fonts to load
-  await page.evaluate(() => document.fonts.ready);
+  // Wait for web fonts to load (with a 2-second timeout fallback)
+  try {
+    await Promise.race([
+      page.evaluate(() => document.fonts.ready),
+      new Promise(resolve => setTimeout(resolve, 2000))
+    ]);
+  } catch (e) {
+    console.log("Web fonts ready check skipped/timed out:", e.message);
+  }
 
   // Give a small buffer for page layout stabilization
   await page.evaluate(() => new Promise(r => setTimeout(r, 500)));
