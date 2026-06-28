@@ -30,16 +30,6 @@ const path = require('path');
   // Set viewport to A4 aspect ratio representation
   await page.setViewport({ width: 1200, height: 1600 });
 
-  await page.setRequestInterception(true);
-  page.on('request', req => {
-    const url = req.url();
-    if (url.includes('fonts.googleapis.com') || url.includes('fonts.gstatic.com')) {
-      req.abort();
-    } else {
-      req.continue();
-    }
-  });
-
   await page.goto('file://' + absoluteHtmlPath, { waitUntil: 'domcontentloaded' });
 
   // Wait for web fonts to load
