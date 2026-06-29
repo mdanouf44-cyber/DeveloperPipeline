@@ -36,16 +36,6 @@ const path = require('path');
     console.log("Navigation timeout or warning, proceeding to print PDF anyway:", e.message);
   }
 
-  // Wait for web fonts to load (with a 2-second timeout fallback)
-  try {
-    await Promise.race([
-      page.evaluate(() => document.fonts.ready),
-      new Promise(resolve => setTimeout(resolve, 2000))
-    ]);
-  } catch (e) {
-    console.log("Web fonts ready check skipped/timed out:", e.message);
-  }
-
   // Give a small buffer for page layout stabilization
   await page.evaluate(() => new Promise(r => setTimeout(r, 500)));
 
