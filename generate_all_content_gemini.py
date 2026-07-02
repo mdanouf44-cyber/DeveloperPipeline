@@ -16,7 +16,7 @@ openrouter_key = os.environ.get("OPENROUTER_API_KEY")
 gemini_key = os.environ.get("GEMINI_API_KEY")
 gemini_model = os.environ.get("GEMINI_MODEL", "gemini-1.5-pro")
 nvidia_key = os.environ.get("NVIDIA_API_KEY")
-nvidia_model = os.environ.get("NVIDIA_MODEL", "deepseek-ai/deepseek-v4-pro")
+nvidia_model = os.environ.get("NVIDIA_MODEL", "meta/llama-3.1-8b-instruct")
 
 if not openrouter_key or not gemini_key or not nvidia_key:
     if os.path.exists("./.env"):
@@ -67,56 +67,73 @@ else:
     exit(1)
 
 def call_gemini(system_prompt, prompt, max_tokens=4000):
-    payload = {
-        "model": llm_model,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt}
-        ],
-        "max_tokens": max_tokens
-    }
-    
-    req = urllib.request.Request(
-        url,
-        data=json.dumps(payload).encode("utf-8"),
-        headers=headers,
-        method="POST"
-    )
-    
-    # Retry logic for rate limits (429)
-    for attempt in range(5):
-        try:
-            with urllib.request.urlopen(req, context=ctx) as res:
-                resp = json.loads(res.read().decode("utf-8"))
-                if resp and "choices" in resp and len(resp["choices"]) > 0:
-                    text = resp["choices"][0]["message"]["content"]
-                    # Add post-request delay for Nvidia NIM to avoid hitting RPM rate limits
-                    if nvidia_key:
-                        time.sleep(12)
-                    else:
-                        time.sleep(2)
-                    return text
-                else:
-                    print(f"API returned unexpected response format: {resp}")
-        except urllib.error.HTTPError as e:
-            err_body = ""
+    # Try fast small models first, then fall back to larger ones
+    models_to_try = [llm_model]
+    if nvidia_key:
+        for alt in ["meta/llama-3.1-8b-instruct", "meta/llama-3.2-3b-instruct", "nvidia/llama-3.1-nemotron-nano-8b-v1", "meta/llama-3.1-70b-instruct", "nvidia/llama-3.1-nemotron-70b-instruct"]:
+            if alt not in models_to_try:
+                models_to_try.append(alt)
+                
+    for m_idx, model_name in enumerate(models_to_try):
+        if len(models_to_try) > 1:
+            print(f"Trying model: {model_name} (Attempt {m_idx + 1}/{len(models_to_try)})")
+            
+        payload = {
+            "model": model_name,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": max_tokens
+        }
+        
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers=headers,
+            method="POST"
+        )
+        
+        success = False
+        text_response = None
+        
+        # Try up to 3 times per model to keep total run time reasonable
+        for attempt in range(3):
             try:
-                err_body = e.read().decode("utf-8")
-            except:
-                pass
-            if e.code == 429:
-                # Use a larger backoff delay for Nvidia NIM rate limits
-                backoff_time = 30 * (attempt + 1) if nvidia_key else 15 * (attempt + 1)
-                print(f"Rate limited (429) on API. Response: {err_body}. Retrying in {backoff_time}s...")
-                time.sleep(backoff_time)
-            else:
-                print(f"HTTP Error calling API: {e.code} - {e.reason}. Response: {err_body}")
+                with urllib.request.urlopen(req, context=ctx) as res:
+                    resp = json.loads(res.read().decode("utf-8"))
+                    if resp and "choices" in resp and len(resp["choices"]) > 0:
+                        text_response = resp["choices"][0]["message"]["content"]
+                        success = True
+                        break
+                    else:
+                        print(f"API returned unexpected response format: {resp}")
+            except urllib.error.HTTPError as e:
+                err_body = ""
+                try:
+                    err_body = e.read().decode("utf-8")
+                except:
+                    pass
+                if e.code in (429, 500, 502, 503, 504):
+                    backoff_time = 15 * (attempt + 1) if nvidia_key else 5 * (attempt + 1)
+                    print(f"API Error {e.code} ({e.reason}) on model {model_name}. Retrying in {backoff_time}s... Attempt {attempt + 1}/3")
+                    time.sleep(backoff_time)
+                else:
+                    print(f"HTTP Error calling API: {e.code} - {e.reason}. Response: {err_body}")
+                    break
+            except Exception as e:
+                print(f"Error calling API: {e}")
                 break
-        except Exception as e:
-            traceback.print_exc()
-            print(f"Error calling API: {e}")
-            break
-        time.sleep(5)
+            time.sleep(2)
+            
+        if success:
+            # Post-request delay to avoid RPM rate limits
+            if nvidia_key:
+                time.sleep(12)
+            else:
+                time.sleep(2)
+            return text_response
+            
     return None
 
 # Load context data for references
@@ -159,6 +176,32 @@ WRITING RULES:
 10. Varied sentence lengths. Specific numbers and benchmarks over adjectives. No bullets where flowing prose works better.
 """
 
+# Format fetched RSS feeds for dynamic LLM prompts
+news_context = ""
+if ai_news:
+    news_lines = []
+    for idx, item in enumerate(ai_news[:8]):
+        title = item.get("title", "").strip()
+        desc = item.get("description", "").strip()
+        source = item.get("source", "").strip()
+        news_lines.append(f"{idx+1}. [{source}] {title} - {desc}")
+    news_context = "\n".join(news_lines)
+else:
+    news_context = "No recent RSS AI news found. Use fallback topic: Model Context Protocol (MCP) release."
+
+reddit_context = ""
+if reddit_posts:
+    reddit_lines = []
+    for idx, item in enumerate(reddit_posts[:8]):
+        subreddit = item.get("subreddit", "").strip()
+        title = item.get("title", "").strip()
+        selftext = item.get("selftext", "").strip()
+        selftext = selftext[:200] + "..." if len(selftext) > 200 else selftext
+        reddit_lines.append(f"{idx+1}. [{subreddit}] {title} - {selftext}")
+    reddit_context = "\n".join(reddit_lines)
+else:
+    reddit_context = "No recent Reddit posts found. Use fallback topic: Quantized local LLM execution overhead."
+
 system_prompt_main = f"""You are Mohammad Anouf Saani's AI copywriter. Write a single, highly engaging LinkedIn post based on the instructions.
 {writing_rules}
 """
@@ -189,13 +232,15 @@ Provide the Setup, the Question, the 4 Options, and an Explanation prompt. Do no
     {
         "id": "3. CAROUSEL",
         "prompt": f"""Write a CAROUSEL post content.
-Topic: Model Context Protocol (MCP) data flow.
-Chosen Hook Style: Bold Claim (6-8 words max, curiosity gap).
-Slide 1 Hook: "MCP is replacing custom API wrappers"
-Slides 2-6: Step-by-step process of how Model Context Protocol (MCP) connects client apps (like Cursor or Claude Desktop) to servers (like filesystem, GitHub API, databases) via standard JSON-RPC. Explain how this eliminates the need to build a custom API wrapper for every tool, standardizing tool calls and context sharing. Maximum 2 sentences per slide.
-Slide 7 CTA: "Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more posts on developer workflows."
-Caption: Slide 1 hook, what the carousel covers, engagement question, CTA to save/repost. Max 4 lines.
-Format clearly labeled with Slide 1, Slide 2, etc. and CAROUSEL CAPTION:
+Topic: Pick the most high-signal, interesting, and technical developer/AI news story from the list of latest news below and write a 7-slide breakdown about it:
+{news_context}
+
+Instructions:
+1. Slide 1 Hook: A bold claim hook (6-8 words max, curiosity gap).
+2. Slides 2-6: Step-by-step technical breakdown of how the product/technology works, its architecture, key benefits, or implementation process. Maximum 2 sentences per slide.
+3. Slide 7 CTA: "Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more posts on developer workflows."
+4. Caption: Slide 1 hook, what the carousel covers, engagement question, CTA to save/repost. Max 4 lines.
+5. Format: Label each slide clearly (Slide 1, Slide 2, etc.) and end with 'CAROUSEL CAPTION:'. Do not include markdown bold or headers.
 """
     },
     {
@@ -217,13 +262,11 @@ Start directly with the hook. No titles.
     {
         "id": "6. POST 2",
         "prompt": f"""Write POST 2 (Weekly Roundup).
-Summarize these 4 major technical updates from the past week:
-1. Ollama released native tool call support for local LLMs, enabling offline agent workflows.
-2. vLLM project merged a major PR improving FP8 quantization throughput by 40%.
-3. CrewAI introduced structured output constraints via Pydantic schemas.
-4. Anthropic launched Model Context Protocol (MCP) server directory on GitHub.
+Summarize 4 major technical updates or news stories from the past week based on the latest AI news list:
+{news_context}
+
 Archetype: Weekly Roundup | Emotion: OHHH.
-Format: Intro hook, numbered list (each item max 2 lines), closing, question. No titles.
+Format: Intro hook, numbered list of 4 items (each item max 2 lines summarizing the update and its developer implication), closing, question. No titles.
 """
     },
     {
@@ -282,8 +325,9 @@ for item in posts_to_generate:
     print(f"Generating {item['id']}...")
     result = call_gemini(system_prompt_main, item["prompt"], max_tokens=4000)
     if not result:
-        print(f"Error: Failed to generate {item['id']}.")
-        sys.exit(1)
+        print(f"Warning: Failed to generate {item['id']}. Using placeholder text.")
+        result = f"[Generation failed for {item['id']}. Please re-run the pipeline.]"
+        # Don't exit — let the rest of the posts generate
     
     generated_posts[item["id"]] = result
     
@@ -305,78 +349,27 @@ print(f"11 Main Posts saved to linkedin_posts_{date_compact}.txt")
 
 # Now generate the Carousel JSON
 print("Generating Carousel JSON...")
-carousel_json_prompt = f"""
-You are Mohammad Anouf Saani's AI visual content designer.
-Based on the generated Carousel post (Post 3) below, you must generate the structured JSON configuration for the Carousel slides.
+carousel_post_content = generated_posts.get("3. CAROUSEL", "")
+carousel_json_prompt = f"""You are a JSON writer. Read the Carousel post content below and extract the slide data into JSON.
 
-Post Content:
-{generated_posts.get("3. CAROUSEL", "")}
+CAROUSEL POST CONTENT:
+{carousel_post_content}
 
-Format your output as a single valid JSON object. Do NOT wrap it in any markdown code block, and do NOT include any other text before or after the JSON.
-Your JSON must strictly follow this structure:
-{{
-  "1": {{
-    "HEADER_LABEL": "DEVELOPER WORKFLOW",
-    "HOOK_PART_1": "MCP is replacing",
-    "HOOK_PART_2": "custom API wrappers",
-    "HOOK_EMPHASIS": "API WRAPPERS",
-    "SUBTITLE": "How the Model Context Protocol standardizes tool calls and data sharing between AI clients and local development environments."
-  }},
-  "2": {{
-    "PILL_LABEL": "THE PROBLEM",
-    "EYEBROW": "API HELL",
-    "HEADLINE_PART_1": "Writing custom wrappers for",
-    "HEADLINE_PART_2": "every single tool is",
-    "HEADLINE_EMPHASIS": "INEFFICIENT",
-    "SUBHEAD": "Developers waste hours building bespoke integrations.",
-    "BODY_TEXT": "Connecting Cursor or Claude Desktop to filesystems or databases previously required custom scripting."
-  }},
-  "3": {{
-    "HEADER_LABEL": "THE SHIFT",
-    "HUGE_STAT": "1 Std",
-    "CIRCLE_WORD_1": "JSON",
-    "CIRCLE_WORD_2": "RPC",
-    "HEADLINE_PART_1": "A single protocol to",
-    "HEADLINE_PART_2": "connect clients and",
-    "HEADLINE_EMPHASIS": "SERVERS",
-    "BODY_TEXT": "MCP uses standard JSON-RPC to expose tools, resources, and prompt templates to AI clients natively."
-  }},
-  "4": {{
-    "PILL_LABEL": "INTEGRATION",
-    "EYEBROW": "CLIENT APPS",
-    "HEADLINE_PART_1": "Configure Cursor or Claude",
-    "HEADLINE_PART_2": "to read your local",
-    "HEADLINE_EMPHASIS": "CONTEXT",
-    "SUBHEAD": "Expose files, DBs, and tools to the AI.",
-    "BODY_TEXT": "AI clients read the MCP server configuration file directly, immediately gaining the ability to execute exposed functions."
-  }},
-  "5": {{
-    "HEADER_LABEL": "THE PAYOFF",
-    "HUGE_STAT": "10x",
-    "CIRCLE_WORD_1": "SPEED",
-    "CIRCLE_WORD_2": "GAIN",
-    "HEADLINE_PART_1": "Zero code needed to",
-    "HEADLINE_PART_2": "integrate new data",
-    "HEADLINE_EMPHASIS": "INTEGRATION",
-    "BODY_TEXT": "Once an MCP server is deployed, any compatible client can leverage it instantly without rewrite."
-  }},
-  "6": {{
-    "HEADER_LABEL": "THE LESSON",
-    "HUGE_STAT": "Std",
-    "HEADLINE_PART_1": "Standardization always wins over",
-    "HEADLINE_PART_2": "bespoke custom code",
-    "HEADLINE_EMPHASIS": "STANDARDIZATION",
-    "SUBHEAD": "Build once, run anywhere.",
-    "BODY_TEXT": "Instead of writing API wrappers, build MCP servers to future-proof your developer context pipeline."
-  }},
-  "7": {{
-    "HEADLINE_PART_1": "Standardize your stack",
-    "HEADLINE_PART_2": "and optimize context",
-    "HEADLINE_EMPHASIS": "STANDARDIZE",
-    "SUBHEAD": "Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more breakdowns on developer workflows and systems design."
-  }}
-}}
-Generate slide JSON configs reflecting today's Carousel content. Make sure all values are filled in.
+Output a single valid JSON object with keys "1" through "7". Each key maps to the slide's fields.
+Slide 1 must have: HEADER_LABEL, HOOK_PART_1, HOOK_PART_2, HOOK_EMPHASIS, SUBTITLE
+Slides 2 and 4 must have: PILL_LABEL, EYEBROW, HEADLINE_PART_1, HEADLINE_PART_2, HEADLINE_EMPHASIS, SUBHEAD, BODY_TEXT
+Slides 3 and 5 must have: HEADER_LABEL, HUGE_STAT, CIRCLE_WORD_1, CIRCLE_WORD_2, HEADLINE_PART_1, HEADLINE_PART_2, HEADLINE_EMPHASIS, BODY_TEXT
+Slide 6 must have: HEADER_LABEL, HUGE_STAT, HEADLINE_PART_1, HEADLINE_PART_2, HEADLINE_EMPHASIS, SUBHEAD, BODY_TEXT
+Slide 7 must have: HEADLINE_PART_1, HEADLINE_PART_2, HEADLINE_EMPHASIS, SUBHEAD
+
+IMPORTANT RULES:
+- Extract ALL content directly from the carousel post above. Do NOT invent content.
+- Every field must be a short string (max 10 words each).
+- HOOK_EMPHASIS, HEADLINE_EMPHASIS: pick the 1-3 most impactful words from the hook/headline.
+- HUGE_STAT: a short number, abbreviation, or 1-2 word stat pulled from the slide content.
+- CIRCLE_WORD_1, CIRCLE_WORD_2: two single keywords from the slide topic.
+- Slide 7 SUBHEAD must include: "Follow Mohammad Anouf Saani (www.linkedin.com/in/mohammad-anouf-saani) for more breakdowns."
+- Output raw JSON only. No markdown. No explanation.
 """
 
 carousel_json_str = call_gemini("You are a JSON writer. Only output raw JSON.", carousel_json_prompt, max_tokens=4000)
@@ -508,8 +501,9 @@ for item in perf_posts_list:
     print(f"Generating {item['id']}...")
     result = call_gemini(performance_system_prompt, item["prompt"], max_tokens=4000)
     if not result:
-        print(f"Error: Failed to generate {item['id']}.")
-        sys.exit(1)
+        print(f"Warning: Failed to generate {item['id']}. Using placeholder.")
+        result = f"[Generation failed for {item['id']}. Please re-run the pipeline.]"
+        # Don't exit — continue to next post
         
     # Format text block
     performance_posts_text += "==================================================\n"

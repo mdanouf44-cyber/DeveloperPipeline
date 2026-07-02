@@ -50,7 +50,8 @@ def ensure_valid_images():
 # Run asset verification first
 ensure_valid_images()
 
-skill_path = "./skills/branded-carousel/SKILL.md"
+script_dir = os.path.dirname(os.path.abspath(__file__))
+skill_path = os.path.join(script_dir, "skills", "branded-carousel", "SKILL.md")
 with open(skill_path, "r", encoding="utf-8") as f:
     content = f.read()
 
@@ -61,7 +62,7 @@ t3 = re.search(r"TEMPLATE 3 & 5.*?```html(.*?)```", content, re.DOTALL).group(1)
 t6 = re.search(r"TEMPLATE 6.*?```html(.*?)```", content, re.DOTALL).group(1)
 t7 = re.search(r"TEMPLATE 7.*?```html(.*?)```", content, re.DOTALL).group(1)
 
-out_dir = "./carousel-routine/temp/carousel-branded"
+out_dir = os.path.join(script_dir, "carousel-routine", "temp", "carousel-branded")
 os.makedirs(out_dir, exist_ok=True)
 
 # Linear Purple Color
@@ -69,17 +70,22 @@ color = "#5E6AD2"
 
 # Load dynamic carousel data if exists
 json_data = {}
-if os.path.exists("./carousel_data.json"):
+json_path = os.path.join(script_dir, "carousel_data.json")
+if os.path.exists(json_path):
     try:
-        with open("./carousel_data.json") as f:
+        with open(json_path) as f:
             json_data = json.load(f)
-            print("Loaded dynamic carousel slide data from carousel_data.json")
+            print(f"Loaded dynamic carousel slide data from {json_path}")
     except Exception as e:
-        print(f"Error loading carousel_data.json: {e}")
+        print(f"Error loading {json_path}: {e}")
 
 def get_slide_val(slide_num, key, fallback):
     slide_obj = json_data.get(str(slide_num), json_data.get(slide_num, {}))
-    return slide_obj.get(key, fallback)
+    # Case-insensitive lookup
+    for k, v in slide_obj.items():
+        if k.lower() == key.lower():
+            return v
+    return fallback
 
 data = {
     "1": (t1, {
