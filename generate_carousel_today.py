@@ -84,11 +84,9 @@ def get_slide_val(slide_num, key, fallback):
     # Case-insensitive lookup
     for k, v in slide_obj.items():
         if k.lower() == key.lower():
-            # Only use the LLM value if it's a non-empty string
-            if v and str(v).strip():
+            # Return value if it is present and not None (even if empty string)
+            if v is not None:
                 return str(v).strip()
-            else:
-                return fallback
     return fallback
 
 data = {
@@ -169,9 +167,86 @@ for slide_num, (template, replacements) in data.items():
     html = template
     for k, v in replacements.items():
         html = html.replace(k, v)
+    
     # Correct template 3 & 5 replacement bugs if any (e.g. circle word 2)
     html = html.replace("{{CIRCLE_WORD_2}}", replacements.get("{{CIRCLE_WORD_2}}", "LOST" if slide_num=="3" else "JUMP"))
-    with open(f"{out_dir}/slide-0{slide_num}.html", "w") as f:
+
+    # DYNAMIC FONT-SIZE AND LAYOUT ADJUSTMENTS FOR PREVENTING OVERLAPS
+    
+    # Check HUGE_STAT length for slides 3, 5, 6
+    huge_stat = replacements.get("{{HUGE_STAT}}", "")
+    if huge_stat:
+        h_len = len(huge_stat)
+        if h_len <= 3:
+            h_size = "220px" if slide_num != "6" else "170px"
+        elif h_len <= 6:
+            h_size = "150px"
+        elif h_len <= 10:
+            h_size = "100px"
+        else:
+            h_size = "65px" # extremely scaled down for phrases
+        
+        # Slide 6 huge number uses smaller size by default
+        if slide_num == "6" and h_len > 6:
+            h_size = "50px"
+            
+        html = html.replace(".huge-number {", f".huge-number {{ font-size: {h_size} !important; ")
+
+    # Check combined headline length
+    part1 = replacements.get("{{HEADLINE_PART_1}}", "")
+    part2 = replacements.get("{{HEADLINE_PART_2}}", "")
+    part1_alt = replacements.get("{{HOOK_PART_1}}", "")
+    part2_alt = replacements.get("{{HOOK_PART_2}}", "")
+    
+    headline_text = part1 + part2 if part1 else part1_alt + part2_alt
+    headline_len = len(headline_text)
+    
+    if slide_num in ["1", "7"]:
+        # Cover and CTA slides (default 80px)
+        if headline_len > 80:
+            hl_size = "34px"
+        elif headline_len > 55:
+            hl_size = "45px"
+        elif headline_len > 35:
+            hl_size = "60px"
+        else:
+            hl_size = "80px"
+        html = html.replace(".headline {", f".headline {{ font-size: {hl_size} !important; ")
+    else:
+        # Inner slides (default 55px / 50px)
+        if headline_len > 80:
+            hl_size = "30px"
+        elif headline_len > 50:
+            hl_size = "38px"
+        else:
+            hl_size = "50px"
+        html = html.replace(".headline {", f".headline {{ font-size: {hl_size} !important; ")
+
+    # Check subhead size
+    subhead = replacements.get("{{SUBHEAD}}", "")
+    if subhead:
+        s_len = len(subhead)
+        if s_len > 80:
+            s_size = "16px"
+        elif s_len > 50:
+            s_size = "20px"
+        else:
+            s_size = "24px"
+        html = html.replace(".subhead {", f".subhead {{ font-size: {s_size} !important; ")
+
+    # Check body text size
+    body_text = replacements.get("{{BODY_TEXT}}", "")
+    if body_text:
+        b_len = len(body_text)
+        if b_len > 120:
+            b_size = "18px"
+        elif b_len > 80:
+            b_size = "21px"
+        else:
+            b_size = "24px"
+        html = html.replace(".bottom-text {", f".bottom-text {{ font-size: {b_size} !important; ")
+
+    with open(f"{out_dir}/slide-0{slide_num}.html", "w", encoding="utf-8") as f:
         f.write(html)
 
 print("Generated 7 HTML slides successfully in temp/carousel-branded.")
