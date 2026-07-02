@@ -84,7 +84,11 @@ def get_slide_val(slide_num, key, fallback):
     # Case-insensitive lookup
     for k, v in slide_obj.items():
         if k.lower() == key.lower():
-            return v
+            # Only use the LLM value if it's a non-empty string
+            if v and str(v).strip():
+                return str(v).strip()
+            else:
+                return fallback
     return fallback
 
 data = {

@@ -383,12 +383,17 @@ if carousel_json_str:
     
     try:
         carousel_data = json.loads(text_to_parse)
-        with open("./carousel_data.json", "w", encoding="utf-8") as f:
+        # Use script-relative path to guarantee consistency with generate_carousel_today.py reader
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        carousel_json_path = os.path.join(script_dir, "carousel_data.json")
+        with open(carousel_json_path, "w", encoding="utf-8") as f:
             json.dump(carousel_data, f, indent=2)
-        print("Saved carousel_data.json successfully!")
+        slide1 = carousel_data.get("1", {})
+        topic_hint = slide1.get("HEADER_LABEL") or slide1.get("HOOK_PART_1") or "(unknown)"
+        print(f"Saved carousel_data.json successfully! Slide 1 topic: {topic_hint[:80]}")
     except Exception as e:
         print(f"Error parsing Carousel JSON: {e}")
-        print("Raw text:", carousel_json_str)
+        print("Raw text:", carousel_json_str[:500])
 
 # Now generate the Infographic JSON
 print("Generating Infographic JSON...")
