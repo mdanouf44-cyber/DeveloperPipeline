@@ -302,6 +302,89 @@ app.post('/api/trigger', (req, res) => {
     res.json({ success: true, message: `Asynchronously triggered ${type} pipeline execution.` });
 });
 
+// Partial pipeline runner - carousel-only or posts-only, sends results to Telegram
+function runPartialPipeline(mode) {
+    if (pipelineState.running) {
+        logToFile('[Warning] Pipeline already running. Cannot start partial run: ' + mode);
+        return;
+    }
+    pipelineState.running = true;
+    pipelineState.currentTask = mode;
+    fs.writeFileSync(LOG_FILE_PATH, '=== Starting PARTIAL Pipeline: ' + mode.toUpperCase() + ' ===\n');
+    const label = mode === 'carousel-only' ? '🎠 Carousel Only' : '📝 Posts Only';
+    sendTelegramDirect(process.env.TELEGRAM_CHAT_ID, '🚀 <b>Partial Run: ' + label + '</b> — starting now...');
+
+    let steps = [];
+    if (mode === 'carousel-only') {
+        steps = [
+            { cmd: 'python', args: ['run_generation.py'],            desc: 'Fetch Feeds & Generate Content' },
+            { cmd: 'node',   args: ['build_carousel_today.cjs'],     desc: 'Compile Carousel Slides & PDF', useNodePath: true },
+            { cmd: 'python', args: ['send_carousel_to_telegram.py'], desc: 'Send Carousel to Telegram' }
+        ];
+    } else if (mode === 'posts-only') {
+        steps = [
+            { cmd: 'python', args: ['run_generation.py'],         desc: 'Fetch Feeds & Generate Post Data' },
+            { cmd: 'python', args: ['send_posts_to_telegram.py'], desc: 'Send Text Posts to Telegram' }
+        ];
+    }
+
+    let currentStep = 0;
+
+    function runNextPartialStep() {
+        if (currentStep >= steps.length) {
+            pipelineState.running = false;
+            pipelineState.currentTask = null;
+            pipelineState.lastRunTime = new Date().toISOString();
+            pipelineState.lastRunResult = 'success';
+            logToFile('=== Partial Pipeline [' + mode + '] Completed Successfully! ===');
+            const doneLabel = mode === 'carousel-only' ? '🎠 Carousel' : '📝 Posts';
+            sendTelegramDirect(process.env.TELEGRAM_CHAT_ID, '✅ <b>Partial Run Complete: ' + doneLabel + ' delivered to Telegram!</b>');
+            return;
+        }
+        const step = steps[currentStep];
+        logToFile('\n[Partial Step ' + (currentStep + 1) + '/' + steps.length + '] Starting: ' + step.desc + '...');
+        sendTelegramDirect(process.env.TELEGRAM_CHAT_ID, '⏳ <b>[Step ' + (currentStep + 1) + '/' + steps.length + ']</b> ' + step.desc + '...');
+        const env = { ...process.env };
+        if (step.useNodePath) env.NODE_PATH = path.join(__dirname, 'carousel-routine', 'node_modules');
+        const proc = spawn(step.cmd, step.args, { cwd: __dirname, env, shell: true });
+        proc.stdout.on('data', (d) => { d.toString().split('\n').forEach(l => { if (l.trim()) logToFile('[Stdout] ' + l.trim()); }); });
+        proc.stderr.on('data', (d) => { d.toString().split('\n').forEach(l => { if (l.trim()) logToFile('[Stderr] ' + l.trim()); }); });
+        proc.on('close', (code) => {
+            logToFile('[Partial Step] ' + step.desc + ' exited with code ' + code);
+            if (code === 0) { currentStep++; runNextPartialStep(); }
+            else {
+                pipelineState.running = false;
+                pipelineState.currentTask = null;
+                pipelineState.lastRunTime = new Date().toISOString();
+                pipelineState.lastRunResult = 'failed';
+                logToFile('=== Partial Pipeline [' + mode + '] FAILED at: ' + step.desc + ' (code ' + code + ') ===');
+                sendTelegramDirect(process.env.TELEGRAM_CHAT_ID, '❌ <b>Partial Run Failed</b> at: <i>' + step.desc + '</i> (Exit Code: ' + code + ')');
+            }
+        });
+        proc.on('error', (err) => {
+            pipelineState.running = false;
+            pipelineState.currentTask = null;
+            pipelineState.lastRunResult = 'failed';
+            logToFile('=== Partial Pipeline Error: ' + err.message + ' ===');
+            sendTelegramDirect(process.env.TELEGRAM_CHAT_ID, '❌ <b>Partial Run Error:</b> <code>' + err.message + '</code>');
+        });
+    }
+    runNextPartialStep();
+}
+
+app.post('/api/trigger-partial', (req, res) => {
+    const { mode } = req.body;
+    if (mode !== 'carousel-only' && mode !== 'posts-only') {
+        return res.status(400).json({ error: "Invalid mode. Must be 'carousel-only' or 'posts-only'." });
+    }
+    if (pipelineState.running) {
+        return res.status(400).json({ error: 'Pipeline is already running another task.' });
+    }
+    setTimeout(() => runPartialPipeline(mode), 100);
+    res.json({ success: true, message: 'Asynchronously triggered partial pipeline: ' + mode });
+});
+
+
 app.get('/api/logs', (req, res) => {
     if (fs.existsSync(LOG_FILE_PATH)) {
         const logs = fs.readFileSync(LOG_FILE_PATH, 'utf8');

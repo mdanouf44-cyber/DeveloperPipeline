@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const triggerTgBtn = document.getElementById('btn-trigger-telegram');
     const triggerLiBtn = document.getElementById('btn-trigger-linkedin');
+    const carouselOnlyBtn = document.getElementById('btn-carousel-only');
+    const postsOnlyBtn = document.getElementById('btn-posts-only');
     const stateBadge = document.getElementById('pipeline-state-badge');
     const lastRunLbl = document.getElementById('lbl-last-run');
     const lastResultLbl = document.getElementById('lbl-last-result');
@@ -72,11 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 stateBadge.className = 'state-badge running';
                 triggerTgBtn.disabled = true;
                 triggerLiBtn.disabled = true;
+                carouselOnlyBtn.disabled = true;
+                postsOnlyBtn.disabled = true;
             } else {
                 stateBadge.innerText = 'Idle';
                 stateBadge.className = 'state-badge idle';
                 triggerTgBtn.disabled = false;
                 triggerLiBtn.disabled = false;
+                carouselOnlyBtn.disabled = false;
+                postsOnlyBtn.disabled = false;
             }
 
             // Update last execution values
@@ -236,9 +242,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Trigger a partial pipeline (carousel-only or posts-only)
+    async function triggerPartial(mode) {
+        try {
+            const res = await fetch('/api/trigger-partial', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const label = mode === 'carousel-only' ? '🎠 Carousel Only' : '📝 Posts Only';
+                showToast(`Started: ${label} — check logs and Telegram!`);
+                updateStatus();
+                setTimeout(fetchLogs, 500);
+            } else {
+                showToast(data.error || 'Failed to start partial run.', 'error');
+            }
+        } catch (e) {
+            showToast('Network error triggering partial run.', 'error');
+        }
+    }
+
     // Event listeners for trigger buttons
     triggerTgBtn.addEventListener('click', () => triggerPipeline('telegram'));
     triggerLiBtn.addEventListener('click', () => triggerPipeline('linkedin'));
+    carouselOnlyBtn.addEventListener('click', () => triggerPartial('carousel-only'));
+    postsOnlyBtn.addEventListener('click', () => triggerPartial('posts-only'));
 
     // Event listeners for scheduler save buttons
     saveTgBtn.addEventListener('click', () => {
